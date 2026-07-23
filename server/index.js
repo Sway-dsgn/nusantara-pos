@@ -39,6 +39,12 @@ app.use('/uploads', (req, res, next) => {
   }
 });
 
+// Wait for DB init before processing routes
+app.use(async (req, res, next) => {
+  await dbInit;
+  next();
+});
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
@@ -64,7 +70,7 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: err.message || 'Internal Server Error' });
 });
 
-initDB().catch(err => {
+const dbInit = initDB().catch(err => {
   console.error('DB init error:', err);
 });
 
