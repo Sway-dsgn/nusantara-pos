@@ -4,7 +4,7 @@ import cors from 'cors';
 import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { initDB } from './db.js';
+import { initDB, pool } from './db.js';
 
 import authRoutes from './routes/auth.js';
 import userRoutes from './routes/users.js';
@@ -59,6 +59,15 @@ app.use('/api/upload', uploadRoutes);
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+app.get('/api/debug', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT COUNT(*) as cnt FROM users');
+    res.json({ connected: true, users: result.rows[0].cnt });
+  } catch (err) {
+    res.json({ connected: false, error: err.message });
+  }
 });
 
 // Error handler
