@@ -17,3 +17,5 @@ server/uploads/*
 # Dependencies
 *.lock
 bun.lock
+
+.vercel
