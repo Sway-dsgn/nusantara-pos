@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import path from 'node:path';
+import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { initDB } from './db.js';
 
@@ -16,13 +17,27 @@ import storeProfileRoutes from './routes/store-profile.js';
 import uploadRoutes from './routes/upload.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const isVercel = process.env.VERCEL === '1';
+const uploadsDir = isVercel ? '/tmp/uploads' : path.join(__dirname, 'uploads');
+
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', (req, res, next) => {
+  const filePath = path.join(uploadsDir, req.path);
+  if (fs.existsSync(filePath)) {
+    res.sendFile(filePath);
+  } else {
+    res.status(404).json({ error: 'File tidak ditemukan' });
+  }
+});
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -49,18 +64,16 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: err.message || 'Internal Server Error' });
 });
 
-// Initialize DB and start server
-async function start() {
-  try {
-    await initDB();
-    app.listen(PORT, () => {
-      console.log(`🚀 Nusantara POS Server running on http://localhost:${PORT}`);
-      console.log(`📦 Database: PostgreSQL (Supabase)`);
-    });
-  } catch (err) {
-    console.error('Failed to start server:', err);
-    process.exit(1);
-  }
+initDB().catch(err => {
+  console.error('DB init error:', err);
+});
+
+if (!isVercel) {
+  app.listen(PORT, () => {
+    console.log(`🚀 Nusantara POS Server running on http://localhost:${PORT}`);
+    console.log(`📦 Database: PostgreSQL (Supabase)`);
+  });
 }
 
-start();
+export { initDB };
+export default app;
