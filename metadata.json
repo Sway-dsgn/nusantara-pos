@@ -1,0 +1,6 @@
+{
+  "name": "Nusantara POS",
+  "description": "Aplikasi kasir (POS), pengelolaan gudang/stok (inventory), absensi karyawan, catatan harian operasional (logbook), dan laporan keuangan otomatis dengan hak akses penuh untuk Owner dan Kasir.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

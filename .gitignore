@@ -1,0 +1,19 @@
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+
+# Server
+server/node_modules/
+server/.env
+server/database.db*
+server/uploads/*
+!server/uploads/.gitkeep
+
+# Dependencies
+*.lock
+bun.lock
