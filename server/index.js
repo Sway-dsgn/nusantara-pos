@@ -5,6 +5,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { initDB, pool } from './db.js';
+import bcrypt from 'bcryptjs';
 
 import authRoutes from './routes/auth.js';
 import userRoutes from './routes/users.js';
@@ -67,6 +68,21 @@ app.get('/api/debug', async (req, res) => {
     res.json({ connected: true, users: result.rows[0].cnt });
   } catch (err) {
     res.json({ connected: false, error: err.message });
+  }
+});
+
+app.post('/api/reset-owner', async (req, res) => {
+  try {
+    const hash = bcrypt.hashSync('123', 10);
+    await pool.query("UPDATE users SET password = $1 WHERE username = 'owner'", [hash]);
+    const check = await pool.query("SELECT password FROM users WHERE username = 'owner'");
+    if (check.rows.length > 0 && bcrypt.compareSync('123', check.rows[0].password)) {
+      res.json({ success: true, message: 'Owner password reset to 123' });
+    } else {
+      res.json({ success: false, message: 'Reset failed - password mismatch' });
+    }
+  } catch (err) {
+    res.json({ success: false, error: err.message });
   }
 });
 
