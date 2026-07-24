@@ -165,7 +165,12 @@ export default function App() {
     if (logsRes.status === "fulfilled") setDailyLogs(logsRes.value);
     else console.error("Gagal ambil daily logs:", logsRes.reason);
 
-    if (profileRes.status === "fulfilled") setStoreProfile(profileRes.value);
+    if (profileRes.status === "fulfilled") setStoreProfile({
+      ...profileRes.value,
+      pajak_aktif: profileRes.value.pajak_aktif ?? false,
+      pajak_persen: profileRes.value.pajak_persen ?? 0,
+      no_rekening: profileRes.value.no_rekening ?? "",
+    });
     else console.error("Gagal ambil store profile:", profileRes.reason);
 
     const failedCount = results.filter(r => r.status === "rejected").length;
@@ -371,7 +376,12 @@ export default function App() {
     setStoreProfile(profile);
     try {
       const saved = await storeProfileApi.update(profile);
-      setStoreProfile(saved);
+      setStoreProfile({
+        ...saved,
+        pajak_aktif: saved.pajak_aktif ?? profile.pajak_aktif ?? false,
+        pajak_persen: saved.pajak_persen ?? profile.pajak_persen ?? 0,
+        no_rekening: saved.no_rekening ?? profile.no_rekening ?? "",
+      });
     } catch (err) {
       console.error("Failed to update store profile:", err);
     }
@@ -381,7 +391,6 @@ export default function App() {
   useEffect(() => {
     if (activeView === "settings") {
       usersApi.list().then(setUsers).catch(console.error);
-      storeProfileApi.get().then(setStoreProfile).catch(console.error);
     }
   }, [activeView]);
 

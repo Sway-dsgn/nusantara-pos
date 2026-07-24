@@ -157,7 +157,7 @@ export default function KelolaAkun({
     alert(`Status akun ${u.nama} berhasil dirubah menjadi ${!u.aktif ? 'AKTIF' : 'NON-AKTIF'}.`);
   };
 
-  const handleSaveStoreSettings = () => {
+  const handleSaveStoreSettings = async () => {
     onUpdateStoreProfile({
       ...storeProfile,
       alamat: storeAddress,
