@@ -53,27 +53,12 @@ router.post('/', verifyToken, async (req, res) => {
       VALUES ($1, $2, $3, $4, $5, $6, $7, 'lunas', $8, $9, $10)
     `, [id, tanggal, user.id, user.nama, total || 0, diskon || 0, metode_bayar, pelanggan_nama || '', pelanggan_wa || '', pelanggan_domisili || '']);
 
-    // Insert detail items and deduct stock
+    // Insert detail items
     for (const item of items) {
       await client.query(`
         INSERT INTO detail_transactions (transaksi_id, produk_id, produk_nama, qty, harga_saat_jual, subtotal)
         VALUES ($1, $2, $3, $4, $5, $6)
       `, [id, item.produk_id, item.produk_nama, item.qty, item.harga_saat_jual, item.subtotal]);
-
-      // Deduct stock
-      const prodResult = await client.query('SELECT * FROM products WHERE id = $1', [item.produk_id]);
-      if (prodResult.rows.length > 0) {
-        const product = prodResult.rows[0];
-        const newStok = Math.max(0, product.stok - item.qty);
-        await client.query('UPDATE products SET stok = $1 WHERE id = $2', [newStok, item.produk_id]);
-
-        // Log stock movement
-        const moveId = `STK-${nanoid(6)}`;
-        await client.query(`
-          INSERT INTO stock_movements (id, produk_id, produk_nama, jenis, jumlah, tanggal, oleh_user_id, oleh_user_nama, keterangan)
-          VALUES ($1, $2, $3, 'penjualan', $4, $5, $6, $7, $8)
-        `, [moveId, item.produk_id, product.nama, -item.qty, tanggal, user.id, user.nama, `Penjualan kasir transaksi ${id}`]);
-      }
     }
 
     await client.query('COMMIT');

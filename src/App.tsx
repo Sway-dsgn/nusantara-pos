@@ -207,14 +207,12 @@ export default function App() {
   // ─── Global State Mutations (API + local update) ─────────────────────
 
   const handleAddTransaction = async (newTx: Transaksi) => {
+    setTransactions(prev => [newTx, ...prev]);
     try {
       const created = await transactionsApi.create(newTx);
-      setTransactions(prev => [created, ...prev]);
-      const freshProducts = await productsApi.list();
-      setProducts(freshProducts);
-    } catch (err) {
-      console.error("Gagal simpan transaksi:", err);
-      alert("Gagal menyimpan transaksi. Periksa koneksi server.");
+      setTransactions(prev => prev.map(t => t.id === newTx.id ? created : t));
+    } catch (err: any) {
+      console.error("Gagal simpan transaksi ke server:", err.message || err);
     }
   };
 
