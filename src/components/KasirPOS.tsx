@@ -177,6 +177,8 @@ export default function KasirPOS({
     const tot = cartSubtotal - appliedDiscount;
     return tot < 0 ? 0 : tot;
   }, [cartSubtotal, appliedDiscount]);
+  
+  const grandTotal = pajakAktif && pajakPersen > 0 ? cartTotal + Math.round(cartTotal * pajakPersen / 100) : cartTotal;
 
   // 5. Discount Approval logic
   const DISCOUNT_THRESHOLD = 15000; // Above 15,000 needs owner password "123"
@@ -221,9 +223,9 @@ export default function KasirPOS({
   const cashShortcuts = [10000, 20000, 50000, 100000];
   const calculatedChange = useMemo(() => {
     const cash = Number(cashAmountInput);
-    if (isNaN(cash) || cash < cartTotal) return 0;
-    return cash - cartTotal;
-  }, [cashAmountInput, cartTotal]);
+    if (isNaN(cash) || cash < grandTotal) return 0;
+    return cash - grandTotal;
+  }, [cashAmountInput, grandTotal]);
 
   // 7. Complete Checkout transaction
   const handleCheckout = () => {
@@ -234,7 +236,7 @@ export default function KasirPOS({
 
     if (paymentMethod === "tunai") {
       const cashVal = Number(cashAmountInput);
-      if (isNaN(cashVal) || cashVal < cartTotal) {
+      if (isNaN(cashVal) || cashVal < grandTotal) {
         alert("Jumlah uang tunai yang dibayar kurang!");
         return;
       }
@@ -256,7 +258,7 @@ export default function KasirPOS({
       tanggal: new Date().toISOString(),
       kasir_id: currentUser.id,
       kasir_nama: currentUser.nama,
-      total: cartTotal + (pajakAktif && pajakPersen > 0 ? Math.round(cartTotal * pajakPersen / 100) : 0),
+      total: grandTotal,
       diskon: appliedDiscount,
       metode_bayar: paymentMethod,
       status: "lunas",
@@ -687,9 +689,15 @@ export default function KasirPOS({
                 <span>Diskon Terpilih</span>
                 <span>- {formatRupiah(appliedDiscount)}</span>
               </div>
+              {pajakAktif && pajakPersen > 0 && (
+                <div className="flex justify-between text-amber-700 font-medium">
+                  <span>PPN {pajakPersen}%</span>
+                  <span>+ {formatRupiah(Math.round(cartTotal * pajakPersen / 100))}</span>
+                </div>
+              )}
               <div className="flex justify-between text-sm font-extrabold text-slate-800 pt-1.5 border-t border-slate-200">
                 <span>TOTAL AKHIR</span>
-                <span className="text-indigo-700 text-base">{formatRupiah(cartTotal)}</span>
+                <span className="text-indigo-700 text-base">{formatRupiah(grandTotal)}</span>
               </div>
             </div>
 
@@ -740,7 +748,7 @@ export default function KasirPOS({
                   />
                   <button 
                     type="button"
-                    onClick={() => setCashAmountInput(cartTotal.toString())}
+                    onClick={() => setCashAmountInput(grandTotal.toString())}
                     className="px-2.5 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-[10px] font-bold cursor-pointer"
                   >
                     Pas
@@ -762,7 +770,7 @@ export default function KasirPOS({
                 </div>
 
                 {/* Change return calculations */}
-                {Number(cashAmountInput) >= cartTotal && (
+                {Number(cashAmountInput) >= grandTotal && (
                   <div className="p-2.5 bg-indigo-50 text-indigo-800 rounded-lg flex justify-between items-center text-xs font-semibold border border-indigo-100">
                     <span>Uang Kembali:</span>
                     <span className="text-sm font-extrabold">{formatRupiah(calculatedChange)}</span>
@@ -799,7 +807,7 @@ export default function KasirPOS({
                 : 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
               }`}
             >
-              Proses Transaksi ({formatRupiah(cartTotal)})
+              Proses Transaksi ({formatRupiah(grandTotal)})
             </button>
 
           </div>
