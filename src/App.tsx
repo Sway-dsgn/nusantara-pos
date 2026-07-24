@@ -176,10 +176,10 @@ export default function App() {
     const token = getToken();
     if (token) {
       authApi.me()
-        .then((res) => {
+        .then(async (res) => {
           setCurrentUser(res.user);
+          await fetchAllData();
           setLoading(false);
-          fetchAllData();
         })
         .catch(() => {
           setToken(null);
