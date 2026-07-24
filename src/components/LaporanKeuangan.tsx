@@ -403,9 +403,9 @@ export default function LaporanKeuangan({
                   </g>
                   {paymentMethodData.map((d, i) => (
                     <g key={d.name}>
-                      <rect x={170} y={10 + i * 28} width={12} height={12} rx="2" fill={d.color} opacity="0.85" />
-                      <text x={186} y={20 + i * 28} fontSize="9" fill="#475569" fontWeight="bold">{d.name}</text>
-                      <text x={250} y={20 + i * 28} fontSize="9" fill="#0f172a" fontWeight="bold" textAnchor="end">{formatRupiah(d.value)}</text>
+                      <rect x={164} y={8 + i * 38} width={10} height={10} rx="2" fill={d.color} opacity="0.85" />
+                      <text x={180} y={16 + i * 38} fontSize="8" fill="#475569" fontWeight="bold">{d.name}</text>
+                      <text x={180} y={26 + i * 38} fontSize="9" fill="#0f172a" fontWeight="bold">{formatRupiah(d.value)}</text>
                     </g>
                   ))}
                 </svg>
