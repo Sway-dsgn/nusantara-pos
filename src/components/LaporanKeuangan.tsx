@@ -518,6 +518,37 @@ export default function LaporanKeuangan({
           <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
             <div className="flex justify-between items-center">
               <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider">Rincian Transaksi POS</h4>
+              {/* Mobile transaction cards */}
+              <div className="block md:hidden space-y-2">
+                {filteredTransactions.map(t => (
+                  <div key={t.id} className="bg-white border border-slate-200 rounded-xl p-3 space-y-1.5 shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-slate-800">{t.id}</span>
+                      <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
+                        t.status === "lunas" ? 'bg-indigo-50 text-indigo-700' : 'bg-red-50 text-red-700'
+                      }`}>
+                        {t.status}
+                      </span>
+                    </div>
+                    <div className="text-[10px] text-slate-400 font-mono">
+                      {new Date(t.tanggal).toLocaleString("id-ID")}
+                    </div>
+                    <div className="text-[10px] text-slate-600">
+                      <span className="font-bold">Kasir:</span> {t.kasir_nama}
+                    </div>
+                    <div className="text-[10px] text-slate-500 font-bold max-w-full truncate">
+                      {t.items.map(item => `${item.produk_nama} (${item.qty}x)`).join(", ")}
+                    </div>
+                    <div className="flex items-center justify-between pt-1 border-t border-slate-100">
+                      <span className="text-[10px] text-slate-400 uppercase font-semibold">{t.metode_bayar}</span>
+                      <div className="text-right">
+                        <span className="text-xs font-bold text-slate-900 font-mono">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(t.total)}</span>
+                        {t.diskon > 0 && <span className="text-[9px] text-rose-500 font-mono block">Diskon: -{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(t.diskon)}</span>}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
               <button 
                 onClick={exportSalesCSV}
                 className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold flex items-center gap-1 focus:outline-none cursor-pointer"
@@ -526,7 +557,7 @@ export default function LaporanKeuangan({
               </button>
             </div>
 
-            <div className="overflow-x-auto">
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-left text-xs text-slate-500">
                 <thead className="text-[10px] text-slate-400 uppercase bg-slate-50/50">
                   <tr>

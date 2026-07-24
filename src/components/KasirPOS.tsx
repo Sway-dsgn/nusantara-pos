@@ -787,7 +787,7 @@ export default function KasirPOS({
       {/* 9. MODAL: OWNER approval for discounts above Rp 15.000 */}
       {showApprovalModal && (
         <div className="fixed inset-0 bg-slate-900/60 flex items-center justify-center z-50 backdrop-blur-sm p-4 animate-fade-in">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-100">
+          <div className="bg-white md:rounded-2xl rounded-none md:max-w-md w-full max-w-none min-h-screen md:min-h-0 p-6 shadow-xl border border-slate-100">
             <div className="flex items-center space-x-3 text-amber-600">
               <div className="p-2 bg-amber-50 rounded-full">
                 <Lock className="w-6 h-6" />
@@ -852,7 +852,7 @@ export default function KasirPOS({
       {/* 10. MODAL: REFUND/RETUR transaction reason */}
       {showRefundModal && selectedTxForRefund && (
         <div className="fixed inset-0 bg-slate-900/60 flex items-center justify-center z-50 backdrop-blur-sm p-4 animate-fade-in">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-100">
+          <div className="bg-white md:rounded-2xl rounded-none md:max-w-md w-full max-w-none min-h-screen md:min-h-0 p-6 shadow-xl border border-slate-100">
             <div className="flex items-center space-x-3 text-red-600 mb-4">
               <div className="p-2 bg-red-50 rounded-full">
                 <Undo2 className="w-6 h-6" />
@@ -922,7 +922,7 @@ export default function KasirPOS({
       {/* 11. MODAL: thermal print-out simulated checkout receipt */}
       {checkoutSuccess && createdTx && (
         <div className="fixed inset-0 bg-slate-900/60 flex items-center justify-center z-50 backdrop-blur-sm p-4 animate-fade-in overflow-y-auto">
-          <div className="bg-white rounded-2xl max-w-sm w-full p-5 shadow-xl border border-slate-200 my-8">
+          <div className="bg-white md:rounded-2xl rounded-none md:max-w-sm w-full max-w-none min-h-screen md:min-h-0 p-5 shadow-xl border border-slate-200 md:my-8">
             <div className="flex justify-between items-center pb-3 border-b border-slate-200 mb-4">
               <span className="text-xs font-bold text-indigo-600 flex items-center gap-1">
                 <CheckCircle className="w-4 h-4" /> Transaksi Berhasil

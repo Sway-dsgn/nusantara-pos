@@ -570,7 +570,7 @@ export default function AbsensiKaryawan({
       {/* OWNER ATTENDANCE EDIT MODAL */}
       {showEditModal && currentUser.role === "owner" && (
         <div className="fixed inset-0 bg-slate-900/60 flex items-center justify-center z-50 backdrop-blur-sm p-4 animate-fade-in">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200">
+          <div className="bg-white md:rounded-2xl rounded-none md:max-w-md w-full max-w-none min-h-screen md:min-h-0 p-6 shadow-xl border border-slate-200">
             <div className="flex justify-between items-center pb-3 border-b border-slate-200 mb-4">
               <span className="text-base font-bold text-slate-800">
                 {editingAbsId ? "Ubah Kehadiran Karyawan" : "Input Absen Manual Karyawan"}

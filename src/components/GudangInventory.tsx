@@ -431,9 +431,81 @@ export default function GudangInventory({
             )}
           </div>
 
+          {/* Mobile Product Cards */}
+          <div className="block md:hidden space-y-2">
+            {filteredProducts.map(p => {
+              const isLow = p.stok <= p.stok_minimum;
+              const isOut = p.stok <= 0;
+              const isOwner = currentUser.role === "owner";
+              return (
+                <div key={p.id} className={`bg-white rounded-xl border p-3 space-y-2 shadow-sm ${
+                  isOut ? 'border-rose-200' : isLow ? 'border-amber-200' : 'border-slate-200'
+                }`}>
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold text-slate-800 truncate">{p.nama}</p>
+                      <p className="text-[10px] text-slate-400 font-mono">{p.id}</p>
+                    </div>
+                    <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 ${
+                      isOut ? 'bg-rose-50 text-rose-700' :
+                      isLow ? 'bg-amber-50 text-amber-700' : 'bg-emerald-50 text-emerald-700'
+                    }`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${
+                        isOut ? 'bg-rose-600' : isLow ? 'bg-amber-500' : 'bg-emerald-500'
+                      }`} />
+                      {isOut ? 'Habis' : isLow ? 'Menipis' : 'Aman'}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 text-[10px]">
+                    <div>
+                      <span className="text-slate-400">Kategori</span>
+                      <p className="font-bold text-slate-700">{p.kategori}</p>
+                    </div>
+                    <div>
+                      <span className="text-slate-400">Stok</span>
+                      <p className="font-bold text-slate-800 font-mono">{p.stok} {p.satuan}</p>
+                    </div>
+                    <div>
+                      <span className="text-slate-400">Harga</span>
+                      <p className="font-bold text-indigo-600 font-mono">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(p.harga_jual)}</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-1.5 pt-1 border-t border-slate-100">
+                    <button 
+                      onClick={() => openAdjustModal(p, "masuk")}
+                      className="flex-1 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[11px] font-bold rounded-lg flex items-center justify-center gap-1 transition-colors"
+                    >
+                      <Plus className="w-3.5 h-3.5" /> Masuk
+                    </button>
+                    <button 
+                      onClick={() => openAdjustModal(p, "keluar")}
+                      className="flex-1 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-bold rounded-lg flex items-center justify-center gap-1 transition-colors"
+                    >
+                      <Minus className="w-3.5 h-3.5" /> Keluar
+                    </button>
+                    <button 
+                      onClick={() => openEditProductModal(p)}
+                      className="px-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-500 rounded-lg border border-slate-200"
+                    >
+                      <Edit3 className="w-3.5 h-3.5" />
+                    </button>
+                    {isOwner && (
+                      <button 
+                        onClick={() => deleteProduct(p.id)}
+                        className="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-500 rounded-lg border border-rose-100"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
           {/* Catalog Table */}
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-500">
+          <div className="hidden md:block bg-white rounded-xl border border-slate-200 shadow-sm overflow-x-auto">
+            <table className="hidden md:table md:w-full text-left text-xs text-slate-500">
               <thead className="text-[10px] text-slate-400 uppercase bg-slate-50/50 border-b border-slate-200">
                 <tr>
                   <th className="py-3 px-4">ID</th>
@@ -698,7 +770,7 @@ export default function GudangInventory({
       {/* 6. MODAL: TAMBAH / EDIT PRODUK FORM */}
       {showProductModal && (
         <div className="fixed inset-0 bg-slate-900/60 flex items-center justify-center z-50 backdrop-blur-sm p-4 animate-fade-in">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-100">
+          <div className="bg-white md:rounded-2xl rounded-none md:max-w-md w-full max-w-none min-h-screen md:min-h-0 p-6 shadow-xl border border-slate-100">
             <div className="flex justify-between items-center pb-3 border-b border-slate-100 mb-4">
               <span className="text-base font-bold text-slate-800">
                 {modalMode === "tambah" ? "Tambah Produk Baru ke Toko" : "Ubah Informasi Produk"}
@@ -820,7 +892,7 @@ export default function GudangInventory({
       {/* 7. MODAL: QUICK STOCK ADJUSTMENT (IN / OUT) */}
       {showAdjustModal && selectedProductForAdjust && (
         <div className="fixed inset-0 bg-slate-900/60 flex items-center justify-center z-50 backdrop-blur-sm p-4 animate-fade-in">
-          <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl border border-slate-100">
+          <div className="bg-white md:rounded-2xl rounded-none md:max-w-sm w-full max-w-none min-h-screen md:min-h-0 p-6 shadow-xl border border-slate-100">
             <div className={`flex items-center space-x-3 mb-4 ${
               adjustType === "masuk" ? 'text-emerald-600' : 'text-rose-600'
             }`}>
