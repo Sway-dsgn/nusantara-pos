@@ -94,6 +94,13 @@ export default function App() {
     }
   }, [activeView]);
 
+  // ─── Refresh attendance when entering dashboard ─────────────────────
+  useEffect(() => {
+    if (activeView === "dashboard") {
+      attendanceApi.list().then(setAttendanceList).catch(console.error);
+    }
+  }, [activeView]);
+
   // ─── Refresh users when entering settings ───────────────────────────
   useEffect(() => {
     if (activeView === "settings") {
