@@ -8,7 +8,6 @@ import {
   TrendingUp, 
   ShoppingBag, 
   AlertTriangle, 
-  Users, 
   FileText, 
   ArrowRight,
   PackageCheck,
@@ -32,12 +31,11 @@ import {
   Cell, 
   Legend 
 } from "recharts";
-import { Transaksi, Produk, Absensi, CatatanHarian } from "../types";
+import { Transaksi, Produk, CatatanHarian } from "../types";
 
 interface DashboardOwnerProps {
   transactions: Transaksi[];
   products: Produk[];
-  attendance: Absensi[];
   dailyLogs: CatatanHarian[];
   onNavigate: (view: string) => void;
 }
@@ -45,7 +43,6 @@ interface DashboardOwnerProps {
 export default function DashboardOwner({
   transactions,
   products,
-  attendance,
   dailyLogs,
   onNavigate
 }: DashboardOwnerProps) {
@@ -70,10 +67,6 @@ export default function DashboardOwner({
   // Stock alerts
   const lowStockProducts = products.filter(p => p.stok <= p.stok_minimum);
   const lowStockCount = lowStockProducts.length;
-
-  // Attendance of today
-  const todayAttendance = attendance.filter(abs => abs.tanggal === todayStr);
-  const presentCount = todayAttendance.filter(abs => abs.status === "Hadir" || abs.status === "Telat").length;
 
   // 2. Data for Sales Chart based on timeRange (7 Hari, Bulan, or Tahun)
   const getSalesChartData = () => {
@@ -202,7 +195,7 @@ export default function DashboardOwner({
   return (
     <div className="space-y-6" id="owner-dashboard">
       {/* 1. Summary Cards Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {/* Omzet Hari Ini */}
         <div 
           className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between cursor-pointer hover:border-indigo-200 transition-all"
@@ -266,24 +259,6 @@ export default function DashboardOwner({
           </div>
         </div>
 
-        {/* Kehadiran Hari Ini */}
-        <div 
-          className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between cursor-pointer hover:border-indigo-200 transition-all"
-          onClick={() => onNavigate("absensi")}
-          id="kpi-attendance"
-        >
-          <div>
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Karyawan Hadir</p>
-            <h3 className="text-2xl font-bold text-slate-800 mt-1">{presentCount}</h3>
-            <p className="text-xs text-indigo-600 mt-1 font-medium flex items-center">
-              <Users className="w-3.5 h-3.5 mr-1" />
-              Dari absensi hari ini
-            </p>
-          </div>
-          <div className="p-3 bg-indigo-50 rounded-xl text-indigo-600 flex items-center justify-center flex-shrink-0">
-            <Users className="w-6 h-6" />
-          </div>
-        </div>
       </div>
 
       {/* 2. Visual Charts & Notifications Grid */}

@@ -659,7 +659,6 @@ export default function App() {
               <DashboardOwner
                 transactions={transactions}
                 products={products}
-                attendance={attendanceList}
                 dailyLogs={dailyLogs}
                 onNavigate={handleNavigate}
               />
@@ -667,7 +666,6 @@ export default function App() {
               <DashboardKasir
                 currentUser={currentUser}
                 transactions={transactions}
-                attendance={attendanceList}
                 dailyLogs={dailyLogs}
                 onNavigate={handleNavigate}
               />

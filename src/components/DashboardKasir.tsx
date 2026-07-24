@@ -8,7 +8,6 @@ import {
   Calculator, 
   Package, 
   FileEdit, 
-  Fingerprint,
   ShoppingBag,
   TrendingUp,
   Clock,
@@ -26,12 +25,11 @@ import {
   CartesianGrid, 
   Tooltip 
 } from "recharts";
-import { User, Transaksi, Absensi, CatatanHarian } from "../types";
+import { User, Transaksi, CatatanHarian } from "../types";
 
 interface DashboardKasirProps {
   currentUser: User;
   transactions: Transaksi[];
-  attendance: Absensi[];
   dailyLogs: CatatanHarian[];
   onNavigate: (view: string) => void;
 }
@@ -39,7 +37,6 @@ interface DashboardKasirProps {
 export default function DashboardKasir({
   currentUser,
   transactions,
-  attendance,
   dailyLogs,
   onNavigate
 }: DashboardKasirProps) {
@@ -62,11 +59,6 @@ export default function DashboardKasir({
       total: tx.total,
       id: tx.id
     };
-  });
-
-  // Current attendance status
-  const myTodayAttendance = attendance.find(abs => {
-    return abs.tanggal === todayStr && abs.user_id === currentUser.id;
   });
 
   const myLogsToday = dailyLogs.filter(log => {
@@ -99,7 +91,7 @@ export default function DashboardKasir({
       </div>
 
       {/* 1. Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         
         {/* Omzet Shift Ini */}
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
@@ -128,25 +120,7 @@ export default function DashboardKasir({
           </div>
         </div>
 
-        {/* Status Absensi */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
-          <div>
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Kehadiran Hari Ini</p>
-            <h3 className="text-xl font-bold text-slate-800 mt-1">
-              {myTodayAttendance ? myTodayAttendance.status : "Belum Absen Masuk"}
-            </h3>
-            <p className="text-xs text-indigo-600 mt-1 font-medium">
-              {myTodayAttendance?.jam_masuk ? (
-                `Masuk jam ${myTodayAttendance.jam_masuk}`
-              ) : (
-                "Silakan isi absensi terlebih dahulu"
-              )}
-            </p>
-          </div>
-          <div className={`p-3 rounded-xl flex items-center justify-center flex-shrink-0 ${myTodayAttendance ? 'bg-indigo-50 text-indigo-600' : 'bg-rose-50 text-rose-500'}`}>
-            <Fingerprint className="w-6 h-6" />
-          </div>
-        </div>
+
 
       </div>
 
