@@ -19,21 +19,7 @@ import {
   BarChart2,
   PieChart as PieChartIcon
 } from "lucide-react";
-import { 
-  ResponsiveContainer,
-  AreaChart, 
-  Area,
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  PieChart, 
-  Pie, 
-  Cell, 
-  Legend 
-} from "recharts";
+
 import { User, Produk, Transaksi, PergerakanStok, Absensi } from "../types";
 
 interface LaporanKeuanganProps {
@@ -186,50 +172,6 @@ export default function LaporanKeuangan({
     }));
   }, [users, attendanceList]);
 
-  // Chart Data calculations
-  const dailyTrendData = useMemo(() => {
-    const trendMap: Record<string, { date: string; label: string; omzet: number; count: number }> = {};
-    const monthsName = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agt", "Sep", "Okt", "Nov", "Des"];
-
-    activeLunasTx.forEach(tx => {
-      const dateParts = tx.tanggal.split("T")[0].split("-"); // [YYYY, MM, DD]
-      if (dateParts.length < 3) return;
-      const year = dateParts[0];
-      const monthIdx = parseInt(dateParts[1], 10) - 1;
-      const day = parseInt(dateParts[2], 10);
-
-      if (dateRange === "setahun") {
-        // Group by Month: YYYY-MM
-        const monthKey = `${year}-${dateParts[1]}`;
-        if (!trendMap[monthKey]) {
-          trendMap[monthKey] = { 
-            date: monthKey, 
-            label: `${monthsName[monthIdx]} ${year}`, 
-            omzet: 0, 
-            count: 0 
-          };
-        }
-        trendMap[monthKey].omzet += tx.total;
-        trendMap[monthKey].count += 1;
-      } else {
-        // Group by Day: YYYY-MM-DD
-        const dKey = tx.tanggal.split("T")[0];
-        if (!trendMap[dKey]) {
-          trendMap[dKey] = { 
-            date: dKey, 
-            label: `${day} ${monthsName[monthIdx]}`, 
-            omzet: 0, 
-            count: 0 
-          };
-        }
-        trendMap[dKey].omzet += tx.total;
-        trendMap[dKey].count += 1;
-      }
-    });
-
-    return Object.values(trendMap).sort((a, b) => a.date.localeCompare(b.date));
-  }, [activeLunasTx, dateRange]);
-
   const paymentMethodData = useMemo(() => {
     let tunai = 0;
     let qris = 0;
@@ -344,37 +286,6 @@ export default function LaporanKeuangan({
         </div>
       </div>
 
-      {/* TEST CHART - outside tabs */}
-      {dailyTrendData.length > 0 && (() => {
-        const w = 700, h = 200, px = 40, py = 20;
-        const maxVal = Math.max(...dailyTrendData.map(d => Number(d.omzet) || 0)) || 1;
-        const xStep = (w - px * 2) / Math.max(dailyTrendData.length - 1, 1);
-        const points = dailyTrendData.map((d, i) => ({
-          x: px + i * xStep,
-          y: h - py - (Number(d.omzet) / maxVal) * (h - py * 2),
-          label: d.label,
-          val: d.omzet
-        }));
-        const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x},${p.y}`).join(' ');
-        const areaD = points.length > 0 ? `M${points[0].x},${h - py}L${pathD.slice(1)}L${points[points.length-1].x},${h - py}Z` : '';
-        return (
-          <div className="h-64 w-full bg-white rounded-xl border p-4" id="test-chart">
-            <p className="text-xs font-bold mb-2">Omzet (SVG manual)</p>
-            <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-48" style={{ maxWidth: 700 }}>
-              <rect x="0" y="0" width={w} height={h} fill="#f8fafc" rx="4" />
-              {Array.from({ length: 5 }, (_, i) => (
-                <line key={i} x1={px} y1={py + i * (h - py * 2) / 4} x2={w - px} y2={py + i * (h - py * 2) / 4} stroke="#e2e8f0" strokeWidth="1" />
-              ))}
-              <path d={areaD} fill="#4f46e5" fillOpacity="0.15" />
-              <path d={pathD} fill="none" stroke="#4f46e5" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
-              {points.map((p, i) => (
-                <circle key={i} cx={p.x} cy={p.y} r="4" fill="#4f46e5" stroke="#fff" strokeWidth="2" />
-              ))}
-            </svg>
-          </div>
-        );
-      })()}
-
       {/* Reports navigation list tabs */}
       <div className="flex items-center space-x-1.5 border-b border-slate-200 overflow-x-auto pb-1">
         <button 
@@ -456,91 +367,48 @@ export default function LaporanKeuangan({
             </div>
           </div>
 
-          {/* Charts Row for Sales Trend and Payment Breakdown */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Sales Trend Chart */}
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm lg:col-span-2">
-              <div className="flex justify-between items-center mb-4">
-                <div>
-                  <h4 className="text-sm font-bold text-slate-800 flex items-center gap-1.5">
-                    <BarChart2 className="w-4 h-4 text-indigo-600" /> Grafik Tren Omzet Penjualan
-                  </h4>
-                  <p className="text-xs text-slate-400 mt-0.5">Grafik dinamika pendapatan berdasarkan rentang filter</p>
-                </div>
-              </div>
-              
-              <div className="h-60 w-full pt-2" style={{ minHeight: 240 }} id="recharts-omzet">
-                {dailyTrendData.length === 0 ? (
-                  <div className="flex items-center justify-center h-full text-xs text-slate-400">
-                    Belum ada data transaksi lunas dalam rentang ini
-                  </div>
-                ) : (() => {
-                  const cw = 700, ch = 220, px = 45, py = 20;
-                  const maxVal = Math.max(...dailyTrendData.map(d => Number(d.omzet) || 0)) || 1;
-                  const xStep = (cw - px * 2) / Math.max(dailyTrendData.length - 1, 1);
-                  const pts = dailyTrendData.map((d, i) => ({
-                    x: px + i * xStep,
-                    y: ch - py - (Number(d.omzet) / maxVal) * (ch - py * 2),
-                    label: d.label,
-                    val: d.omzet
-                  }));
-                  const lineD = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x},${p.y}`).join(' ');
-                  const areaD = pts.length > 0 ? `M${pts[0].x},${ch - py}${lineD.slice(1)}L${pts[pts.length-1].x},${ch - py}Z` : '';
-                  return (
-                    <svg viewBox={`0 0 ${cw} ${ch}`} className="w-full h-full">
-                      <rect x="0" y="0" width={cw} height={ch} fill="#f8fafc" rx="4" />
-                      {Array.from({ length: 5 }, (_, i) => (
-                        <line key={i} x1={px} y1={py + i * (ch - py * 2) / 4} x2={cw - px} y2={py + i * (ch - py * 2) / 4} stroke="#f1f5f9" strokeWidth="1" />
-                      ))}
-                      <path d={areaD} fill="#4f46e5" fillOpacity="0.12" />
-                      <path d={lineD} fill="none" stroke="#4f46e5" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
-                      {pts.map((p, i) => (
-                        <circle key={i} cx={p.x} cy={p.y} r="4" fill="#4f46e5" stroke="#fff" strokeWidth="2" />
-                      ))}
-                    </svg>
-                  );
-                })()}
-              </div>
-            </div>
-
-            {/* Payment Method Distribution Pie Chart */}
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
-              <div>
-                <h4 className="text-sm font-bold text-slate-800 mb-1 flex items-center gap-1.5">
-                  <PieChartIcon className="w-4 h-4 text-indigo-600" /> Metode Pembayaran
-                </h4>
-                <p className="text-xs text-slate-400 mb-2">Tunai vs QRIS Digital</p>
-
-                <div className="h-48 w-full relative" style={{ minHeight: 192 }}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={paymentMethodData}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={35}
-                        outerRadius={60}
-                        paddingAngle={5}
-                        dataKey="value"
-                      >
-                        {paymentMethodData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip 
-                        formatter={(val: any) => [formatRupiah(Number(val) || 0), 'Total']}
-                        contentStyle={{ backgroundColor: '#0f172a', borderRadius: '0.75rem', color: '#fff', fontSize: '11px', border: 'none' }}
-                      />
-                      <Legend 
-                        iconType="circle" 
-                        layout="horizontal" 
-                        verticalAlign="bottom" 
-                        align="center"
-                        formatter={(value) => <span className="text-[10px] text-slate-600 font-bold">{value}</span>}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
+          {/* Payment Method Distribution SVG Donut */}
+          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+            <div>
+              <h4 className="text-sm font-bold text-slate-800 mb-1 flex items-center gap-1.5">
+                <PieChartIcon className="w-4 h-4 text-indigo-600" /> Metode Pembayaran
+              </h4>
+              <p className="text-xs text-slate-400 mb-2">Tunai vs QRIS Digital</p>
+              <div className="h-48 w-full relative" style={{ minHeight: 192 }}>
+                <svg viewBox="0 0 280 200" className="w-full h-full">
+                  <g transform="translate(90,100)">
+                    {(() => {
+                      const total = paymentMethodData.reduce((s, d) => s + d.value, 0) || 1;
+                      let cumPct = 0;
+                      const slices = paymentMethodData.map((d) => {
+                        const pct = d.value / total;
+                        const startAngle = cumPct * 360 - 90;
+                        cumPct += pct;
+                        const endAngle = cumPct * 360 - 90;
+                        const r = 50;
+                        const ri = 25;
+                        const inner = (deg) => [ri * Math.cos((deg * Math.PI) / 180), ri * Math.sin((deg * Math.PI) / 180)];
+                        const outer = (deg) => [r * Math.cos((deg * Math.PI) / 180), r * Math.sin((deg * Math.PI) / 180)];
+                        const [x1, y1] = outer(startAngle);
+                        const [x2, y2] = outer(endAngle);
+                        const [x3, y3] = inner(endAngle);
+                        const [x4, y4] = inner(startAngle);
+                        const largeArc = endAngle - startAngle > 180 ? 1 : 0;
+                        return (
+                          <path key={d.name} d={`M ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} L ${x3} ${y3} A ${ri} ${ri} 0 ${largeArc} 0 ${x4} ${y4} Z`} fill={d.color} opacity="0.85" />
+                        );
+                      });
+                      return slices;
+                    })()}
+                  </g>
+                  {paymentMethodData.map((d, i) => (
+                    <g key={d.name}>
+                      <rect x={170} y={10 + i * 28} width={12} height={12} rx="2" fill={d.color} opacity="0.85" />
+                      <text x={186} y={20 + i * 28} fontSize="9" fill="#475569" fontWeight="bold">{d.name}</text>
+                      <text x={250} y={20 + i * 28} fontSize="9" fill="#0f172a" fontWeight="bold" textAnchor="end">{formatRupiah(d.value)}</text>
+                    </g>
+                  ))}
+                </svg>
               </div>
             </div>
           </div>
@@ -737,41 +605,28 @@ export default function LaporanKeuangan({
                 <p className="text-xs text-slate-400 mb-4">Perbandingan nominal pendapatan vs modal & laba</p>
 
                 <div className="h-64 w-full relative" style={{ minHeight: 256 }}>
-                  <BarChart data={profitLossBarData} responsive width="100%" height={256} margin={{ top: 10, right: 10, left: 0, bottom: 20 }}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                      <XAxis 
-                        dataKey="name" 
-                        axisLine={false} 
-                        tickLine={false} 
-                        tick={{ fontSize: 9, fill: '#64748b' }}
-                        interval={0}
-                      />
-                      <YAxis 
-                        axisLine={false} 
-                        tickLine={false} 
-                        tick={{ fontSize: 10, fill: '#94a3b8' }}
-                        tickFormatter={(val) => `${(val/1000).toFixed(0)}k`}
-                      />
-                      <Tooltip 
-                        content={({ active, payload }) => {
-                          if (active && payload && payload.length) {
-                            const data = payload[0].payload;
-                            return (
-                              <div className="bg-slate-900 text-white p-3 rounded-xl shadow-xl text-xs border border-slate-700">
-                                <p className="font-bold text-indigo-300">{data.name}</p>
-                                <p className="text-sm font-black mt-1 text-white">{formatRupiah(data.amount)}</p>
-                              </div>
-                            );
-                          }
-                          return null;
-                        }}
-                      />
-                      <Bar dataKey="amount" radius={[6, 6, 0, 0]} barSize={36}>
-                        {profitLossBarData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Bar>
-                    </BarChart>
+                  <svg viewBox="0 0 500 250" className="w-full h-full">
+                    <rect x="0" y="0" width="500" height="250" fill="#f8fafc" rx="8" />
+                    {profitLossBarData.map((d, i) => {
+                      const barW = 70;
+                      const gap = (500 - profitLossBarData.length * barW) / (profitLossBarData.length + 1);
+                      const x = gap + i * (barW + gap);
+                      const maxAmt = Math.max(...profitLossBarData.map(x => Math.abs(x.amount))) || 1;
+                      const barH = (Math.abs(d.amount) / maxAmt) * 180;
+                      const y = d.amount >= 0 ? 220 - barH : 220;
+                      return (
+                        <g key={i}>
+                          <rect x={x} y={y} width={barW} height={barH || 2} rx="4" fill={d.color} opacity="0.85" />
+                          <text x={x + barW / 2} y={y - 6} textAnchor="middle" fontSize="9" fill={d.color} fontWeight="bold">
+                            {(d.amount / 1000).toFixed(0)}k
+                          </text>
+                          <text x={x + barW / 2} y={240} textAnchor="middle" fontSize="7" fill="#64748b" fontWeight="bold">
+                            {d.name}
+                          </text>
+                        </g>
+                      );
+                    })}
+                  </svg>
                 </div>
               </div>
             </div>
@@ -838,20 +693,38 @@ export default function LaporanKeuangan({
           <div className="bg-slate-50/50 p-5 rounded-2xl border border-slate-200">
             <h5 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Grafik Perbandingan Kedisiplinan</h5>
             <div className="h-56 w-full">
-              <BarChart data={attendanceRecap} responsive width="100%" height={224} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                  <XAxis dataKey="nama" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b' }} />
-                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#94a3b8' }} allowDecimals={false} />
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: '#0f172a', borderRadius: '0.75rem', color: '#fff', fontSize: '11px', border: 'none' }}
-                  />
-                  <Legend iconType="circle" formatter={(value) => <span className="text-[11px] text-slate-600 font-semibold">{value}</span>} />
-                  <Bar dataKey="hadir" name="Hadir" fill="#10b981" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="telat" name="Telat" fill="#f59e0b" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="izin" name="Izin" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="sakit" name="Sakit" fill="#a855f7" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="alpha" name="Alpha" fill="#f43f5e" radius={[4, 4, 0, 0]} />
-                </BarChart>
+              <svg viewBox="0 0 700 250" className="w-full h-full">
+                <rect x="0" y="0" width="700" height="250" fill="#f8fafc" rx="8" />
+                {(() => {
+                  const keys = ["hadir","telat","izin","sakit","alpha"];
+                  const colors = ["#10b981","#f59e0b","#3b82f6","#a855f7","#f43f5e"];
+                  const labels = ["Hadir","Telat","Izin","Sakit","Alpha"];
+                  const maxVal = Math.max(...attendanceRecap.flatMap(r => keys.map(k => r[k]))) || 1;
+                  const colW = 700 / attendanceRecap.length;
+                  const barGap = 2;
+                  const groupW = colW - 20;
+                  const barW = Math.max(4, (groupW - barGap * (keys.length - 1)) / keys.length);
+                  const chartH = 200;
+                  return attendanceRecap.flatMap((r, ri) =>
+                    keys.map((k, ki) => {
+                      const barH = (r[k] / maxVal) * chartH;
+                      const x = ri * colW + 10 + ki * (barW + barGap);
+                      const y = chartH + 10 - barH;
+                      return (
+                        <g key={`${ri}-${ki}`}>
+                          <rect x={x} y={y} width={barW} height={Math.max(barH, 1)} rx="2" fill={colors[ki]} opacity="0.85" />
+                          {barH > 15 && (
+                            <text x={x + barW / 2} y={y + barH / 2 + 3} textAnchor="middle" fontSize="7" fill="#fff" fontWeight="bold">{r[k]}</text>
+                          )}
+                        </g>
+                      );
+                    })
+                  );
+                })()}
+                {attendanceRecap.map((r, i) => (
+                  <text key={r.id} x={i * (700 / attendanceRecap.length) + (700 / attendanceRecap.length) / 2} y={225} textAnchor="middle" fontSize="8" fill="#64748b" fontWeight="bold">{r.nama}</text>
+                ))}
+              </svg>
             </div>
           </div>
 
