@@ -259,7 +259,23 @@ export default function KasirPOS({
       items: detailItems
     };
 
-    // Server deducts stock, logs movement, and saves transaction
+    // Deduct stock locally & log movement
+    const updatedProducts = products.map(prod => {
+      const cartMatch = cart.find(item => item.produk.id === prod.id);
+      if (cartMatch) {
+        onLogStockMovement(
+          prod.id,
+          "penjualan",
+          -cartMatch.qty,
+          `Penjualan kasir transaksi ${nextTxId}`
+        );
+        return { ...prod, stok: Math.max(0, prod.stok - cartMatch.qty) };
+      }
+      return prod;
+    });
+    onUpdateProducts(updatedProducts);
+
+    // Save transaction
     onAddTransaction(newTransaction);
     
     // Setup receipt popup

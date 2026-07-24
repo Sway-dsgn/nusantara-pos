@@ -47,7 +47,7 @@ router.post('/', verifyToken, requireOwner, async (req, res) => {
 });
 
 // PUT /api/products/:id
-router.put('/:id', verifyToken, requireOwner, async (req, res) => {
+router.put('/:id', verifyToken, async (req, res) => {
   const { id } = req.params;
 
   try {

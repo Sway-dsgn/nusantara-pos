@@ -211,8 +211,6 @@ export default function App() {
     try {
       const created = await transactionsApi.create(newTx);
       setTransactions(prev => [created, ...prev.filter(t => t.id !== newTx.id)]);
-      const freshProducts = await productsApi.list();
-      setProducts(freshProducts);
     } catch (err: any) {
       console.error("Gagal simpan transaksi ke server:", err.message || err);
     }
