@@ -108,6 +108,7 @@ async function initDB() {
         nama VARCHAR(100) NOT NULL DEFAULT 'NUSANTARA POS',
         alamat TEXT NOT NULL DEFAULT '',
         no_hp VARCHAR(20) NOT NULL DEFAULT '',
+        no_wa VARCHAR(20) NOT NULL DEFAULT '',
         footer TEXT NOT NULL DEFAULT 'Terima kasih atas kunjungan Anda!'
       );
     `);
@@ -126,9 +127,9 @@ async function initDB() {
     const profileCheck = await client.query('SELECT id FROM store_profile WHERE id = 1');
     if (profileCheck.rows.length === 0) {
       await client.query(`
-        INSERT INTO store_profile (id, nama, alamat, no_hp, footer)
-        VALUES (1, $1, $2, $3, $4)
-      `, ['NUSANTARA POS', 'Jl. Pembangunan No. 42, Kota Jakarta', '0812-3456-7890', 'Terima kasih atas kunjungan Anda!']);
+        INSERT INTO store_profile (id, nama, alamat, no_hp, no_wa, footer)
+        VALUES (1, $1, $2, $3, $4, $5)
+      `, ['NUSANTARA POS', 'Jl. Pembangunan No. 42, Kota Jakarta', '0812-3456-7890', '0812-3456-7890', 'Terima kasih atas kunjungan Anda!']);
       console.log('✓ Seed: store profile created');
     }
 

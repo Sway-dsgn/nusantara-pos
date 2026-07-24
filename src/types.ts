@@ -86,6 +86,7 @@ export interface StoreProfile {
   nama: string;
   alamat: string;
   no_hp: string;
+  no_wa?: string;
   footer: string;
 }
 

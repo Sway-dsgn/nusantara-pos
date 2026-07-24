@@ -60,6 +60,7 @@ export default function App() {
     nama: "NUSANTARA POS",
     alamat: "",
     no_hp: "",
+    no_wa: "",
     footer: "Terima kasih atas kunjungan Anda!",
   });
 

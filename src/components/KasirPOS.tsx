@@ -900,6 +900,7 @@ export default function KasirPOS({
                 <h2 className="text-sm font-bold tracking-wider">{storeProfile?.nama || "NUSANTARA POS"}</h2>
                 <p className="text-[10px] text-slate-500">{storeProfile?.alamat || "Jl. Pembangunan No. 42, Kota Jakarta"}</p>
                 <p className="text-[9px] text-slate-400">Telp: {storeProfile?.no_hp || "0812-3456-7890"}</p>
+                {storeProfile?.no_wa && <p className="text-[9px] text-slate-400">WA: {storeProfile.no_wa}</p>}
               </div>
 
               <div className="border-t border-dashed border-slate-300 pt-2 space-y-1">

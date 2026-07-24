@@ -40,12 +40,14 @@ export default function KelolaAkun({
   const [storeName, setStoreName] = useState(storeProfile.nama);
   const [storeAddress, setStoreAddress] = useState(storeProfile.alamat);
   const [storePhone, setStorePhone] = useState(storeProfile.no_hp);
+  const [storeWa, setStoreWa] = useState(storeProfile.no_wa || "");
   const [storeFooter, setStoreFooter] = useState(storeProfile.footer);
 
   React.useEffect(() => {
     setStoreName(storeProfile.nama);
     setStoreAddress(storeProfile.alamat);
     setStorePhone(storeProfile.no_hp);
+    setStoreWa(storeProfile.no_wa || "");
     setStoreFooter(storeProfile.footer);
   }, [storeProfile]);
 
@@ -153,6 +155,7 @@ export default function KelolaAkun({
       nama: storeName,
       alamat: storeAddress,
       no_hp: storePhone,
+      no_wa: storeWa,
       footer: storeFooter
     });
     alert("Pengaturan Toko & Informasi Nota Thermal berhasil disimpan secara permanen!");
@@ -295,6 +298,19 @@ export default function KelolaAkun({
                 type="text" 
                 value={storePhone}
                 onChange={e => setStorePhone(e.target.value)}
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:bg-white"
+              />
+            </div>
+
+            <div>
+              <label className="block mb-1 text-slate-500 font-medium flex items-center gap-1">
+                <Phone className="w-3.5 h-3.5 text-slate-400" /> Nomor WhatsApp (opsional)
+              </label>
+              <input 
+                type="text" 
+                placeholder="Contoh: 0812-9876-1234"
+                value={storeWa}
+                onChange={e => setStoreWa(e.target.value)}
                 className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:bg-white"
               />
             </div>
