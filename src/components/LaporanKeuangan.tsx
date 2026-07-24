@@ -439,6 +439,11 @@ export default function LaporanKeuangan({
               </div>
               
               <div className="h-60 w-full pt-2">
+                {dailyTrendData.length === 0 ? (
+                  <div className="flex items-center justify-center h-full text-xs text-slate-400">
+                    Belum ada data transaksi lunas dalam rentang ini
+                  </div>
+                ) : (
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={dailyTrendData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                     <defs>
@@ -473,6 +478,7 @@ export default function LaporanKeuangan({
                     <Area type="monotone" dataKey="omzet" stroke="#4f46e5" strokeWidth={3} fillOpacity={1} fill="url(#omzetGradient)" />
                   </AreaChart>
                 </ResponsiveContainer>
+                )}
               </div>
             </div>
 
