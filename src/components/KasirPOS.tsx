@@ -1092,22 +1092,32 @@ export default function KasirPOS({
                 onClick={async () => {
                   const receiptEl = document.getElementById("receipt-print-area");
                   if (!receiptEl) return;
+                  const wa = (customerWa || storeProfile?.kontak || "").replace(/[^0-9]/g, "");
                   try {
-                    const canvas = await html2canvas(receiptEl, { scale: 2, backgroundColor: "#ffffff" });
+                    const canvas = await html2canvas(receiptEl, { scale: 2, backgroundColor: "#ffffff", useCORS: true, allowTaint: false });
                     const imgData = canvas.toDataURL("image/png");
                     const pdf = new jsPDF("p", "mm", [80, 300]);
                     const pdfWidth = 80;
                     const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+                    if (pdfHeight > 300) pdf.addPage();
                     pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
                     const pdfBlob = pdf.output("blob");
                     const file = new File([pdfBlob], `struk_${createdTx.id}.pdf`, { type: "application/pdf" });
                     if (navigator.canShare && navigator.canShare({ files: [file] })) {
                       await navigator.share({ files: [file], title: "Struk Belanja" });
-                    } else {
-                      pdf.save(`struk_${createdTx.id}.pdf`);
+                      return;
                     }
+                    // Web Share not available => download, then open WA
+                    pdf.save(`struk_${createdTx.id}.pdf`);
+                    if (wa) window.open(`https://wa.me/${wa}`, "_blank");
                   } catch {
-                    window.print();
+                    // html2canvas failed => fallback wa.me with text
+                    if (wa) {
+                      const txt = receiptEl.innerText;
+                      window.open(`https://wa.me/${wa}?text=${encodeURIComponent(txt)}`, "_blank");
+                    } else {
+                      window.print();
+                    }
                   }
                 }}
                 className="w-full py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 focus:outline-none"
