@@ -20,8 +20,6 @@ import {
   PieChart as PieChartIcon
 } from "lucide-react";
 import { 
-  AreaChart, 
-  Area, 
   BarChart, 
   Bar, 
   XAxis, 
@@ -443,38 +441,15 @@ export default function LaporanKeuangan({
                     Belum ada data transaksi lunas dalam rentang ini
                   </div>
                 ) : (
-                  <AreaChart data={dailyTrendData} responsive width="100%" height={230} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                    <defs>
-                      <linearGradient id="omzetGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.4}/>
-                        <stop offset="95%" stopColor="#4f46e5" stopOpacity={0.0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                    <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b' }} />
-                    <YAxis 
-                      axisLine={false} 
-                      tickLine={false} 
-                      tick={{ fontSize: 10, fill: '#94a3b8' }} 
-                      tickFormatter={(val) => `Rp ${(val/1000).toFixed(0)}k`}
-                    />
-                    <Tooltip 
-                      content={({ active, payload }) => {
-                        if (active && payload && payload.length) {
-                          const data = payload[0].payload;
-                          return (
-                            <div className="bg-slate-900 text-white p-3 rounded-xl shadow-xl text-xs border border-slate-700">
-                              <p className="font-bold text-indigo-300">Tanggal: {data.date}</p>
-                              <p className="text-sm font-black mt-1 text-white">{formatRupiah(data.omzet)}</p>
-                              <p className="text-[10px] text-slate-400 mt-0.5">{data.count} Transaksi</p>
-                            </div>
-                          );
-                        }
-                        return null;
-                      }}
-                    />
-                    <Area type="monotone" dataKey="omzet" stroke="#4f46e5" strokeWidth={3} fillOpacity={1} fill="url(#omzetGradient)" />
-                  </AreaChart>
+                  <svg width="100%" height="230" xmlns="http://www.w3.org/2000/svg" style={{ border: '1px solid red' }}>
+                    <rect x="0" y="0" width="100%" height="230" fill="#f0f0ff" />
+                    <text x="10" y="20" fontSize="12" fill="#4338ca">
+                      Data: {dailyTrendData.length} points
+                    </text>
+                    {dailyTrendData.map((d, i) => (
+                      <circle key={i} cx={30 + i * 60} cy={180 - (d.omzet / Math.max(...dailyTrendData.map(x => x.omzet))) * 150} r="4" fill="#4f46e5" />
+                    ))}
+                  </svg>
                 )}
               </div>
             </div>
@@ -489,8 +464,7 @@ export default function LaporanKeuangan({
 
                 <div className="h-48 w-full relative" style={{ minHeight: 192 }}>
                   <PieChart responsive width="100%" height={192}>
-                    <PieChart>
-                      <Pie
+                    <Pie
                         data={paymentMethodData}
                         cx="50%"
                         cy="50%"
