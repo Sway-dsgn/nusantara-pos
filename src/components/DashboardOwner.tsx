@@ -63,6 +63,9 @@ export default function DashboardOwner({
 
   const todayRevenue = todayTransactions.reduce((sum, tx) => sum + tx.total, 0);
   const todayTxCount = todayTransactions.length;
+  const todayItemsSold = todayTransactions.reduce((sum, tx) => {
+    return sum + (tx.items || []).reduce((s, item) => s + item.qty, 0);
+  }, 0);
 
   // Stock alerts
   const lowStockProducts = products.filter(p => p.stok <= p.stok_minimum);
