@@ -19,7 +19,7 @@ import {
   Undo2,
   Lock,
   ArrowRight,
-  MessageCircle
+  FileText
 } from "lucide-react";
 import { User, Produk, Transaksi, DetailTransaksi, MetodeBayar, StatusTransaksi, StoreProfile } from "../types";
 
@@ -1075,25 +1075,95 @@ export default function KasirPOS({
               </button>
               <button 
                 onClick={() => {
-                  const wa = createdTx.pelanggan_wa;
-                  if (!wa) {
-                    alert("Pelanggan tidak memiliki nomor WhatsApp tercantum!");
-                    return;
+                  const receiptEl = document.getElementById("receipt-print-area");
+                  if (!receiptEl) return;
+                  
+                  const receiptHTML = receiptEl.innerHTML;
+                  const style = `
+                    <style>
+                      @page { margin: 0; size: 80mm auto; }
+                      body { font-family: 'Courier New', monospace; font-size: 11px; color: #222; margin: 0; padding: 10px; }
+                      .text-center { text-align: center; }
+                      .space-y-1 > * + * { margin-top: 4px; }
+                      .space-y-4 > * + * { margin-top: 16px; }
+                      .border-t { border-top: 1px dashed #ccc; }
+                      .border-dashed { border-style: dashed; }
+                      .pt-2 { padding-top: 8px; }
+                      .pt-3 { padding-top: 12px; }
+                      .pb-1 { padding-bottom: 4px; }
+                      .flex { display: flex; }
+                      .justify-between { justify-content: space-between; }
+                      .items-center { align-items: center; }
+                      .font-bold { font-weight: bold; }
+                      .font-semibold { font-weight: 600; }
+                      .font-mono { font-family: 'Courier New', monospace; }
+                      .text-sm { font-size: 13px; }
+                      .text-xs { font-size: 11px; }
+                      .text-\\[10px\\] { font-size: 10px; }
+                      .text-\\[9px\\] { font-size: 9px; }
+                      .text-\\[8px\\] { font-size: 8px; }
+                      .text-\\[7px\\] { font-size: 7px; }
+                      .tracking-wider { letter-spacing: 1px; }
+                      .tracking-widest { letter-spacing: 2px; }
+                      .text-slate-400 { color: #94a3b8; }
+                      .text-slate-500 { color: #64748b; }
+                      .text-slate-800 { color: #1e293b; }
+                      .text-slate-900 { color: #0f172a; }
+                      .text-indigo-600 { color: #4f46e5; }
+                      .text-indigo-700 { color: #4338ca; }
+                      .text-amber-700 { color: #b45309; }
+                      .text-rose-500 { color: #f43f5e; }
+                      .text-center { text-align: center; }
+                      .space-y-1\\.5 > * + * { margin-top: 6px; }
+                      .flex-col { flex-direction: column; }
+                      .gap-1 { gap: 4px; }
+                      .gap-1\\.5 { gap: 6px; }
+                      .uppercase { text-transform: uppercase; }
+                      .flex { display: flex; }
+                      .shadow-inner { box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); }
+                      .rounded-xl { border-radius: 12px; }
+                      .p-4 { padding: 16px; }
+                      .bg-slate-50 { background: #f8fafc; }
+                      .border { border: 1px solid #e2e8f0; }
+                      .border-slate-200 { border-color: #e2e8f0; }
+                      .border-slate-300 { border-color: #cbd5e1; }
+                      .mt-0\\.5 { margin-top: 2px; }
+                      .mt-1 { margin-top: 4px; }
+                      .mb-1 { margin-bottom: 4px; }
+                      .text-\\[11px\\] { font-size: 11px; }
+                      .text-\\[12px\\] { font-size: 12px; }
+                      .w-20 { width: 80px; }
+                      .h-20 { height: 80px; }
+                      .mx-auto { margin: 0 auto; }
+                      img { max-width: 100%; }
+                    </style>
+                  `;
+                  
+                  const fullHTML = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Struk Belanja</title>${style}</head><body>${receiptHTML}</body></html>`;
+                  
+                  // Create a blob and share via Web Share API (mobile) or download
+                  const blob = new Blob([fullHTML], { type: 'text/html' });
+                  const file = new File([blob], `struk_${createdTx.id}.html`, { type: 'text/html' });
+                  
+                  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    navigator.share({ files: [file], title: 'Struk Belanja' });
+                  } else {
+                    // Fallback: open in new window and print (Save as PDF)
+                    const w = window.open('', '_blank');
+                    if (w) {
+                      w.document.write(fullHTML);
+                      w.document.close();
+                      w.focus();
+                      setTimeout(() => w.print(), 500);
+                    } else {
+                      // Popup blocked, fallback to normal print
+                      window.print();
+                    }
                   }
-                  const cleanNum = wa.replace(/[^0-9]/g, "");
-                  const internationalNum = cleanNum.startsWith("0") ? "62" + cleanNum.slice(1) : cleanNum;
-                  
-                  const items = createdTx.items.map(i => `  ${i.produk_nama} ${i.qty}x ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(i.subtotal)}`).join("\n");
-                  const pajakLine = storeProfile?.pajak_aktif && storeProfile.pajak_persen > 0 ? `\nPPN ${storeProfile.pajak_persen}%: ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(Math.round(createdTx.total * storeProfile.pajak_persen / 100))}` : "";
-                  const grandTotal = storeProfile?.pajak_aktif && storeProfile.pajak_persen > 0 ? createdTx.total + Math.round(createdTx.total * storeProfile.pajak_persen / 100) : createdTx.total;
-                  
-                  const msg = `🧾 *${storeProfile?.nama || "NUSANTARA POS"}*\n${storeProfile?.alamat || ""}\n\n*STRUK BELANJA*\nKode: ${createdTx.id}\nTgl: ${new Date(createdTx.tanggal).toLocaleString("id-ID")}\nKasir: ${createdTx.kasir_nama}${createdTx.pelanggan_nama ? `\nPelanggan: ${createdTx.pelanggan_nama}` : ""}\n\n${items}\n\nSubtotal: ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(createdTx.items.reduce((s, i) => s + i.subtotal, 0))}${createdTx.diskon > 0 ? `\nDiskon: -${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(createdTx.diskon)}` : ""}${pajakLine}\n*TOTAL: ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(grandTotal)}*\n\nTerima kasih atas kunjungan Anda!`;
-                  
-                  window.open(`https://wa.me/${internationalNum}?text=${encodeURIComponent(msg)}`, "_blank");
                 }}
                 className="w-full py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 focus:outline-none"
               >
-                <MessageCircle className="w-4 h-4" /> Kirim Struk ke WA Pelanggan
+                <FileText className="w-4 h-4" /> Kirim Struk (PDF) ke WA
               </button>
               <button 
                 onClick={handleResetPOS}
