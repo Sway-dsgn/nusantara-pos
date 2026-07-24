@@ -57,6 +57,7 @@ export default function KasirPOS({
   const [customerName, setCustomerName] = useState("");
   const [customerWa, setCustomerWa] = useState("");
   const [customerDomisili, setCustomerDomisili] = useState("");
+  const [customerRekening, setCustomerRekening] = useState("");
 
   // Discount & Approvals
   const [discountInput, setDiscountInput] = useState<number>(0);
@@ -256,6 +257,7 @@ export default function KasirPOS({
       pelanggan_nama: customerName.trim() || undefined,
       pelanggan_wa: customerWa.trim() || undefined,
       pelanggan_domisili: customerDomisili.trim() || undefined,
+      pelanggan_rekening: customerRekening.trim() || undefined,
       items: detailItems
     };
 
@@ -490,6 +492,7 @@ export default function KasirPOS({
                     <th className="py-2 px-3 whitespace-nowrap">Pelanggan</th>
                     <th className="py-2 px-3 whitespace-nowrap">No. WA</th>
                     <th className="py-2 px-3 whitespace-nowrap">Domisili</th>
+                    <th className="py-2 px-3 whitespace-nowrap">No. Rek</th>
                     {currentUser.role === "owner" && <th className="py-2 px-3 whitespace-nowrap">Kasir</th>}
                     <th className="py-2 px-3 whitespace-nowrap">Jml</th>
                     <th className="py-2 px-3 whitespace-nowrap">Total</th>
@@ -508,6 +511,7 @@ export default function KasirPOS({
                       <td className="py-2 px-3 text-slate-600">{tx.pelanggan_nama || "-"}</td>
                       <td className="py-2 px-3 text-slate-500 text-[10px]">{tx.pelanggan_wa || "-"}</td>
                       <td className="py-2 px-3 text-slate-500 text-[10px]">{tx.pelanggan_domisili || "-"}</td>
+                      <td className="py-2 px-3 text-slate-500 text-[10px]">{tx.pelanggan_rekening || "-"}</td>
                       {currentUser.role === "owner" && (
                         <td className="py-2 px-3 text-slate-600">{tx.kasir_nama.split(" ")[0]}</td>
                       )}
@@ -642,6 +646,13 @@ export default function KasirPOS({
                 className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
               />
             </div>
+            <input
+              type="text"
+              placeholder="No. Rekening Pembeli (opsional)"
+              value={customerRekening}
+              onChange={e => setCustomerRekening(e.target.value)}
+              className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            />
           </div>
 
           {/* Pricing & Checkout Methods Form */}
@@ -944,6 +955,7 @@ export default function KasirPOS({
                 <p className="text-[10px] text-slate-500">{storeProfile?.alamat || "Jl. Pembangunan No. 42, Kota Jakarta"}</p>
                 <p className="text-[9px] text-slate-400">Telp: {storeProfile?.no_hp || "0812-3456-7890"}</p>
                 {storeProfile?.no_wa && <p className="text-[9px] text-slate-400">WA: {storeProfile.no_wa}</p>}
+                {storeProfile?.no_rekening && <p className="text-[9px] text-slate-400">Rek: {storeProfile.no_rekening}</p>}
               </div>
 
                 <div className="border-t border-dashed border-slate-300 pt-2 space-y-1">
@@ -975,6 +987,12 @@ export default function KasirPOS({
                     <div className="flex justify-between">
                       <span>Domisili:</span>
                       <span>{createdTx.pelanggan_domisili}</span>
+                    </div>
+                  )}
+                  {createdTx.pelanggan_rekening && (
+                    <div className="flex justify-between">
+                      <span>No. Rek:</span>
+                      <span>{createdTx.pelanggan_rekening}</span>
                     </div>
                   )}
                 </div>

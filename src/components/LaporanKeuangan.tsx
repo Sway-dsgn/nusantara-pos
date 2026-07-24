@@ -276,7 +276,7 @@ export default function LaporanKeuangan({
   };
 
   const exportSalesCSV = () => {
-    const headers = ["ID Transaksi", "Tanggal", "Nama Kasir", "Pelanggan", "No. WA", "Domisili", "Total Belanja (IDR)", "Diskon (IDR)", "Metode Bayar", "Status"];
+    const headers = ["ID Transaksi", "Tanggal", "Nama Kasir", "Pelanggan", "No. WA", "Domisili", "No. Rekening", "Total Belanja (IDR)", "Diskon (IDR)", "Metode Bayar", "Status"];
     const rows = filteredTransactions.map(t => [
       t.id,
       new Date(t.tanggal).toLocaleString("id-ID"),
@@ -284,6 +284,7 @@ export default function LaporanKeuangan({
       t.pelanggan_nama || "",
       t.pelanggan_wa || "",
       t.pelanggan_domisili || "",
+      t.pelanggan_rekening || "",
       t.total,
       t.diskon,
       t.metode_bayar,
@@ -554,6 +555,11 @@ export default function LaporanKeuangan({
                         <span className="font-bold">Domisili:</span> {t.pelanggan_domisili}
                       </div>
                     )}
+                    {t.pelanggan_rekening && (
+                      <div className="text-[10px] text-slate-500">
+                        <span className="font-bold">No. Rek:</span> {t.pelanggan_rekening}
+                      </div>
+                    )}
                     <div className="text-[10px] text-slate-500 font-bold max-w-full truncate">
                       {t.items.map(item => `${item.produk_nama} (${item.qty}x)`).join(", ")}
                     </div>
@@ -586,6 +592,7 @@ export default function LaporanKeuangan({
                     <th className="py-2 px-3 whitespace-nowrap">Pelanggan</th>
                     <th className="py-2 px-3 whitespace-nowrap">No. WA</th>
                     <th className="py-2 px-3 whitespace-nowrap">Domisili</th>
+                    <th className="py-2 px-3 whitespace-nowrap">No. Rek</th>
                     <th className="py-2 px-3 whitespace-nowrap">Barang Terbeli</th>
                     <th className="py-2 px-3 whitespace-nowrap">Subtotal Diskon</th>
                     <th className="py-2 px-3 whitespace-nowrap">Jml</th>
@@ -605,6 +612,7 @@ export default function LaporanKeuangan({
                       <td className="py-2.5 px-3 text-slate-600 text-[10px]">{t.pelanggan_nama || "-"}</td>
                       <td className="py-2.5 px-3 text-slate-500 text-[10px]">{t.pelanggan_wa || "-"}</td>
                       <td className="py-2.5 px-3 text-slate-500 text-[10px]">{t.pelanggan_domisili || "-"}</td>
+                      <td className="py-2.5 px-3 text-slate-500 text-[10px]">{t.pelanggan_rekening || "-"}</td>
                       <td className="py-2.5 px-3 text-[11px] text-slate-500 font-bold max-w-xs truncate">
                         {t.items.map(item => `${item.produk_nama} (${item.qty}x)`).join(", ")}
                       </td>

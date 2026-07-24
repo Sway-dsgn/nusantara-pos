@@ -64,7 +64,8 @@ async function initDB() {
         retur_alasan TEXT,
         pelanggan_nama VARCHAR(100) NOT NULL DEFAULT '',
         pelanggan_wa VARCHAR(20) NOT NULL DEFAULT '',
-        pelanggan_domisili VARCHAR(200) NOT NULL DEFAULT ''
+        pelanggan_domisili VARCHAR(200) NOT NULL DEFAULT '',
+        pelanggan_rekening VARCHAR(50) NOT NULL DEFAULT ''
       );
 
       CREATE TABLE IF NOT EXISTS detail_transactions (
@@ -127,6 +128,7 @@ async function initDB() {
       ALTER TABLE transactions ADD COLUMN IF NOT EXISTS pelanggan_nama VARCHAR(100) NOT NULL DEFAULT '';
       ALTER TABLE transactions ADD COLUMN IF NOT EXISTS pelanggan_wa VARCHAR(20) NOT NULL DEFAULT '';
       ALTER TABLE transactions ADD COLUMN IF NOT EXISTS pelanggan_domisili VARCHAR(200) NOT NULL DEFAULT '';
+      ALTER TABLE transactions ADD COLUMN IF NOT EXISTS pelanggan_rekening VARCHAR(50) NOT NULL DEFAULT '';
     `);
     await client.query(`
       ALTER TABLE attendance ADD COLUMN IF NOT EXISTS foto TEXT;

@@ -51,6 +51,7 @@ export interface Transaksi {
   pelanggan_nama?: string;
   pelanggan_wa?: string;
   pelanggan_domisili?: string;
+  pelanggan_rekening?: string;
   items: DetailTransaksi[];
 }
 

@@ -306,7 +306,7 @@ export default function KelolaAkun({
             )}
             <div>
               <label className="block mb-1 text-slate-500 font-medium flex items-center gap-1">
-                <Banknote className="w-3.5 h-3.5 text-slate-400" /> No. Rekening (opsional)
+                <Banknote className="w-3.5 h-3.5 text-slate-400" /> No. Rekening Toko (opsional)
               </label>
               <input 
                 type="text" 
