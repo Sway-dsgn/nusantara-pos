@@ -230,6 +230,13 @@ export default function App() {
       console.error("Gagal simpan transaksi ke server:", err.message || err);
       setSaveError("Transaksi gagal disimpan ke server! Data hanya tersimpan sementara dan akan hilang saat reload.");
       setTimeout(() => setSaveError(null), 8000);
+      // retry after 10s
+      setTimeout(() => {
+        transactionsApi.create(newTx).then(created => {
+          setTransactions(prev => [created, ...prev.filter(t => t.id !== newTx.id)]);
+          setSaveError(null);
+        }).catch(() => {});
+      }, 10000);
     }
   };
 
@@ -280,6 +287,13 @@ export default function App() {
     } catch (err) {
       console.error("Gagal simpan absen ke server:", err);
       setSaveError("Absen gagal disimpan ke server! Data hanya tersimpan sementara.");
+      setTimeout(() => setSaveError(null), 8000);
+      setTimeout(() => {
+        attendanceApi.create(newAbs).then(created => {
+          setAttendanceList(prev => prev.map(a => a.id === newAbs.id ? created : a));
+          setSaveError(null);
+        }).catch(() => {});
+      }, 10000);
     }
   };
 
