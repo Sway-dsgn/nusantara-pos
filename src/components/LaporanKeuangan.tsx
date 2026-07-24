@@ -22,7 +22,7 @@ import {
 import { 
   ResponsiveContainer,
   AreaChart, 
-  Area, 
+  Area,
   BarChart, 
   Bar, 
   XAxis, 
@@ -345,20 +345,35 @@ export default function LaporanKeuangan({
       </div>
 
       {/* TEST CHART - outside tabs */}
-      <div className="h-64 w-full bg-white rounded-xl border p-4" id="test-chart">
-        <p className="text-xs font-bold mb-2">TEST CHART (data: {dailyTrendData.length})</p>
-        <div className="h-48 w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={dailyTrendData} margin={{ top: 5, right: 5, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-              <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b' }} />
-              <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#94a3b8' }} />
-              <Tooltip />
-              <Area type="monotone" dataKey="omzet" stroke="#4f46e5" strokeWidth={2} fill="#4f46e5" fillOpacity={0.2} />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
+      {dailyTrendData.length > 0 && (() => {
+        const w = 700, h = 200, px = 40, py = 20;
+        const maxVal = Math.max(...dailyTrendData.map(d => Number(d.omzet) || 0)) || 1;
+        const xStep = (w - px * 2) / Math.max(dailyTrendData.length - 1, 1);
+        const points = dailyTrendData.map((d, i) => ({
+          x: px + i * xStep,
+          y: h - py - (Number(d.omzet) / maxVal) * (h - py * 2),
+          label: d.label,
+          val: d.omzet
+        }));
+        const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x},${p.y}`).join(' ');
+        const areaD = points.length > 0 ? `M${points[0].x},${h - py}L${pathD.slice(1)}L${points[points.length-1].x},${h - py}Z` : '';
+        return (
+          <div className="h-64 w-full bg-white rounded-xl border p-4" id="test-chart">
+            <p className="text-xs font-bold mb-2">Omzet (SVG manual)</p>
+            <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-48" style={{ maxWidth: 700 }}>
+              <rect x="0" y="0" width={w} height={h} fill="#f8fafc" rx="4" />
+              {Array.from({ length: 5 }, (_, i) => (
+                <line key={i} x1={px} y1={py + i * (h - py * 2) / 4} x2={w - px} y2={py + i * (h - py * 2) / 4} stroke="#e2e8f0" strokeWidth="1" />
+              ))}
+              <path d={areaD} fill="#4f46e5" fillOpacity="0.15" />
+              <path d={pathD} fill="none" stroke="#4f46e5" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
+              {points.map((p, i) => (
+                <circle key={i} cx={p.x} cy={p.y} r="4" fill="#4f46e5" stroke="#fff" strokeWidth="2" />
+              ))}
+            </svg>
+          </div>
+        );
+      })()}
 
       {/* Reports navigation list tabs */}
       <div className="flex items-center space-x-1.5 border-b border-slate-200 overflow-x-auto pb-1">
@@ -459,42 +474,32 @@ export default function LaporanKeuangan({
                   <div className="flex items-center justify-center h-full text-xs text-slate-400">
                     Belum ada data transaksi lunas dalam rentang ini
                   </div>
-                ) : (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={dailyTrendData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                      <defs>
-                        <linearGradient id="omzetGradient" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.4}/>
-                          <stop offset="95%" stopColor="#4f46e5" stopOpacity={0.0}/>
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                      <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b' }} />
-                      <YAxis 
-                        axisLine={false} 
-                        tickLine={false} 
-                        tick={{ fontSize: 10, fill: '#94a3b8' }} 
-                        tickFormatter={(val) => `Rp ${(val/1000).toFixed(0)}k`}
-                      />
-                      <Tooltip 
-                        content={({ active, payload }) => {
-                          if (active && payload && payload.length) {
-                            const data = payload[0].payload;
-                            return (
-                              <div className="bg-slate-900 text-white p-3 rounded-xl shadow-xl text-xs border border-slate-700">
-                                <p className="font-bold text-indigo-300">Tanggal: {data.date}</p>
-                                <p className="text-sm font-black mt-1 text-white">{formatRupiah(data.omzet)}</p>
-                                <p className="text-[10px] text-slate-400 mt-0.5">{data.count} Transaksi</p>
-                              </div>
-                            );
-                          }
-                          return null;
-                        }}
-                      />
-                      <Area type="monotone" dataKey="omzet" stroke="#4f46e5" strokeWidth={3} fillOpacity={1} fill="url(#omzetGradient)" />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                )}
+                ) : (() => {
+                  const cw = 700, ch = 220, px = 45, py = 20;
+                  const maxVal = Math.max(...dailyTrendData.map(d => Number(d.omzet) || 0)) || 1;
+                  const xStep = (cw - px * 2) / Math.max(dailyTrendData.length - 1, 1);
+                  const pts = dailyTrendData.map((d, i) => ({
+                    x: px + i * xStep,
+                    y: ch - py - (Number(d.omzet) / maxVal) * (ch - py * 2),
+                    label: d.label,
+                    val: d.omzet
+                  }));
+                  const lineD = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x},${p.y}`).join(' ');
+                  const areaD = pts.length > 0 ? `M${pts[0].x},${ch - py}${lineD.slice(1)}L${pts[pts.length-1].x},${ch - py}Z` : '';
+                  return (
+                    <svg viewBox={`0 0 ${cw} ${ch}`} className="w-full h-full">
+                      <rect x="0" y="0" width={cw} height={ch} fill="#f8fafc" rx="4" />
+                      {Array.from({ length: 5 }, (_, i) => (
+                        <line key={i} x1={px} y1={py + i * (ch - py * 2) / 4} x2={cw - px} y2={py + i * (ch - py * 2) / 4} stroke="#f1f5f9" strokeWidth="1" />
+                      ))}
+                      <path d={areaD} fill="#4f46e5" fillOpacity="0.12" />
+                      <path d={lineD} fill="none" stroke="#4f46e5" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
+                      {pts.map((p, i) => (
+                        <circle key={i} cx={p.x} cy={p.y} r="4" fill="#4f46e5" stroke="#fff" strokeWidth="2" />
+                      ))}
+                    </svg>
+                  );
+                })()}
               </div>
             </div>
 
