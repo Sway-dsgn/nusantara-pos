@@ -12,7 +12,6 @@ import {
   Edit2, 
   X, 
   Info, 
-  Store,
   Phone,
   MapPin,
   FileText
@@ -37,14 +36,12 @@ export default function KelolaAkun({
   onUpdateUser
 }: KelolaAkunProps) {
   // Store Settings states
-  const [storeName, setStoreName] = useState(storeProfile.nama);
   const [storeAddress, setStoreAddress] = useState(storeProfile.alamat);
   const [storePhone, setStorePhone] = useState(storeProfile.no_hp);
   const [storeWa, setStoreWa] = useState(storeProfile.no_wa || "");
   const [storeFooter, setStoreFooter] = useState(storeProfile.footer);
 
-  React.useEffect(() => {
-    setStoreName(storeProfile.nama);
+  useEffect(() => {
     setStoreAddress(storeProfile.alamat);
     setStorePhone(storeProfile.no_hp);
     setStoreWa(storeProfile.no_wa || "");
@@ -152,13 +149,13 @@ export default function KelolaAkun({
 
   const handleSaveStoreSettings = () => {
     onUpdateStoreProfile({
-      nama: storeName,
+      ...storeProfile,
       alamat: storeAddress,
       no_hp: storePhone,
       no_wa: storeWa,
       footer: storeFooter
     });
-    alert("Pengaturan Toko & Informasi Nota Thermal berhasil disimpan secara permanen!");
+    alert("Pengaturan Toko berhasil disimpan!");
   };
 
   return (
@@ -266,18 +263,6 @@ export default function KelolaAkun({
           </div>
 
           <div className="space-y-4 text-xs font-semibold text-slate-700">
-            <div>
-              <label className="block mb-1 text-slate-500 font-medium flex items-center gap-1">
-                <Store className="w-3.5 h-3.5 text-slate-400" /> Nama Usaha / Toko
-              </label>
-              <input 
-                type="text" 
-                value={storeName}
-                onChange={e => setStoreName(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:bg-white"
-              />
-            </div>
-
             <div>
               <label className="block mb-1 text-slate-500 font-medium flex items-center gap-1">
                 <MapPin className="w-3.5 h-3.5 text-slate-400" /> Alamat Fisik Toko
