@@ -20,7 +20,6 @@ import {
   PieChart as PieChartIcon
 } from "lucide-react";
 import { 
-  ResponsiveContainer, 
   AreaChart, 
   Area, 
   BarChart, 
@@ -438,14 +437,13 @@ export default function LaporanKeuangan({
                 </div>
               </div>
               
-              <div className="h-60 w-full pt-2 overflow-x-auto" style={{ minHeight: 240 }}>
-                <div className="text-[9px] text-slate-300 mb-1">lunas: {activeLunasTx.length}, chart: {dailyTrendData.length}</div>
+              <div className="h-60 w-full pt-2" style={{ minHeight: 240 }}>
                 {dailyTrendData.length === 0 ? (
                   <div className="flex items-center justify-center h-full text-xs text-slate-400">
                     Belum ada data transaksi lunas dalam rentang ini
                   </div>
                 ) : (
-                  <AreaChart width={700} height={230} data={dailyTrendData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                  <AreaChart data={dailyTrendData} responsive width="100%" height={230} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                     <defs>
                       <linearGradient id="omzetGradient" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.4}/>
@@ -490,7 +488,7 @@ export default function LaporanKeuangan({
                 <p className="text-xs text-slate-400 mb-2">Tunai vs QRIS Digital</p>
 
                 <div className="h-48 w-full relative" style={{ minHeight: 192 }}>
-                  <ResponsiveContainer width="100%" height={192}>
+                  <PieChart responsive width="100%" height={192}>
                     <PieChart>
                       <Pie
                         data={paymentMethodData}
@@ -517,7 +515,6 @@ export default function LaporanKeuangan({
                         formatter={(value) => <span className="text-[10px] text-slate-600 font-bold">{value}</span>}
                       />
                     </PieChart>
-                  </ResponsiveContainer>
                 </div>
               </div>
             </div>
@@ -715,8 +712,7 @@ export default function LaporanKeuangan({
                 <p className="text-xs text-slate-400 mb-4">Perbandingan nominal pendapatan vs modal & laba</p>
 
                 <div className="h-64 w-full relative" style={{ minHeight: 256 }}>
-                  <ResponsiveContainer width="100%" height={256}>
-                    <BarChart data={profitLossBarData} margin={{ top: 10, right: 10, left: 0, bottom: 20 }}>
+                  <BarChart data={profitLossBarData} responsive width="100%" height={256} margin={{ top: 10, right: 10, left: 0, bottom: 20 }}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                       <XAxis 
                         dataKey="name" 
@@ -751,7 +747,6 @@ export default function LaporanKeuangan({
                         ))}
                       </Bar>
                     </BarChart>
-                  </ResponsiveContainer>
                 </div>
               </div>
             </div>
@@ -818,8 +813,7 @@ export default function LaporanKeuangan({
           <div className="bg-slate-50/50 p-5 rounded-2xl border border-slate-200">
             <h5 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Grafik Perbandingan Kedisiplinan</h5>
             <div className="h-56 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={attendanceRecap} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+              <BarChart data={attendanceRecap} responsive width="100%" height={224} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                   <XAxis dataKey="nama" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b' }} />
                   <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#94a3b8' }} allowDecimals={false} />
@@ -833,7 +827,6 @@ export default function LaporanKeuangan({
                   <Bar dataKey="sakit" name="Sakit" fill="#a855f7" radius={[4, 4, 0, 0]} />
                   <Bar dataKey="alpha" name="Alpha" fill="#f43f5e" radius={[4, 4, 0, 0]} />
                 </BarChart>
-              </ResponsiveContainer>
             </div>
           </div>
 
