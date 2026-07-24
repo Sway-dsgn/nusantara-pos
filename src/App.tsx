@@ -85,6 +85,9 @@ export default function App() {
     if (activeView === "kasir" || activeView === "gudang") {
       productsApi.list().then(setProducts).catch(console.error);
     }
+    if (activeView === "dashboard" || activeView === "laporan") {
+      transactionsApi.list().then(setTransactions).catch(console.error);
+    }
   }, [activeView]);
 
   // ─── Close sidebar on view change (mobile) ──────────────────────────
