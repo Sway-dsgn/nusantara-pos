@@ -116,6 +116,13 @@ async function initDB() {
       );
     `);
 
+    // Migration: add columns for existing tables
+    await client.query(`
+      ALTER TABLE transactions ADD COLUMN IF NOT EXISTS pelanggan_nama VARCHAR(100) NOT NULL DEFAULT '';
+      ALTER TABLE transactions ADD COLUMN IF NOT EXISTS pelanggan_wa VARCHAR(20) NOT NULL DEFAULT '';
+      ALTER TABLE transactions ADD COLUMN IF NOT EXISTS pelanggan_domisili VARCHAR(200) NOT NULL DEFAULT '';
+    `);
+
     // Seed data
     const ownerCheck = await client.query('SELECT id FROM users WHERE username = $1', ['owner']);
     if (ownerCheck.rows.length === 0) {
