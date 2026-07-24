@@ -30,6 +30,11 @@ body {
   animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* Safe area padding for notched phones */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
 /* Custom scrollbars */
 .scrollbar-thin::-webkit-scrollbar {
   height: 4px;

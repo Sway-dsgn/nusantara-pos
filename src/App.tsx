@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   authApi,
   usersApi,
@@ -45,7 +45,8 @@ import {
   EyeOff,
   Lock,
   Sparkles,
-  CheckCircle2
+  CheckCircle2,
+  X
 } from "lucide-react";
 
 export default function App() {
@@ -76,6 +77,22 @@ export default function App() {
 
   const [landingScreen, setLandingScreen] = useState<"landing" | "login">("landing");
   const [activeView, setActiveView] = useState<string>("dashboard");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const sidebarRef = useRef<HTMLDivElement>(null);
+
+  // ─── Close sidebar on view change (mobile) ──────────────────────────
+  const handleNavigate = (view: string) => {
+    setActiveView(view);
+    setSidebarOpen(false);
+  };
+
+  const bottomNavItems = [
+    { key: "dashboard", icon: LayoutDashboard, label: "Dashboard" },
+    { key: "kasir", icon: Calculator, label: "POS" },
+    { key: "gudang", icon: Package, label: "Gudang" },
+    { key: "absensi", icon: Fingerprint, label: "Absensi" },
+    { key: "laporan", icon: ClipboardList, label: "Laporan" },
+  ];
 
   // ─── Notifications ────────────────────────────────────────────────────
   const [notifications, setNotifications] = useState<{ id: string; type: "low_stock" | "alert"; text: string }[]>([]);
@@ -306,91 +323,125 @@ export default function App() {
   return (
     <div className="min-h-screen bg-slate-50/50 flex flex-col md:flex-row" id="app-workspace">
 
-      {/* Sidebar */}
-      <aside className="w-full md:w-64 bg-white text-slate-600 flex flex-col justify-between border-r border-slate-200 shadow-xs" id="sidebar-panel">
-        <div>
-          <div className="p-5 border-b border-slate-100 flex items-center space-x-3">
-            <span className="p-2 bg-indigo-600 text-white rounded-xl shadow-xs shadow-indigo-200">
-              <Store className="w-5 h-5" />
-            </span>
-            <div>
-              <h2 className="font-black text-slate-800 text-sm tracking-wide leading-tight">NUSANTARA POS</h2>
-              <p className="text-[10px] text-indigo-600 font-bold flex items-center gap-1 mt-0.5">
-                <CheckCircle className="w-3 h-3 text-indigo-600" /> Sesi Operasional
-              </p>
+      {/* Sidebar - Desktop: always visible, Mobile: drawer */}
+      <>
+        {/* Mobile overlay */}
+        {sidebarOpen && (
+          <div
+            className="fixed inset-0 bg-slate-900/50 z-40 md:hidden backdrop-blur-sm"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+
+        {/* Sidebar content */}
+        <aside
+          ref={sidebarRef}
+          className={`${
+            sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          } fixed md:static md:translate-x-0 inset-y-0 left-0 z-50 w-72 md:w-64 bg-white text-slate-600 flex flex-col justify-between border-r border-slate-200 shadow-xs transition-transform duration-300 ease-in-out`}
+          id="sidebar-panel"
+        >
+          <div>
+            <div className="p-5 border-b border-slate-100 flex items-center justify-between space-x-3">
+              <div className="flex items-center space-x-3">
+                <span className="p-2 bg-indigo-600 text-white rounded-xl shadow-xs shadow-indigo-200">
+                  <Store className="w-5 h-5" />
+                </span>
+                <div>
+                  <h2 className="font-black text-slate-800 text-sm tracking-wide leading-tight">NUSANTARA POS</h2>
+                  <p className="text-[10px] text-indigo-600 font-bold flex items-center gap-1 mt-0.5">
+                    <CheckCircle className="w-3 h-3 text-indigo-600" /> Sesi Operasional
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setSidebarOpen(false)}
+                className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 md:hidden cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
+
+            <div className="p-4 bg-slate-50/80 border-b border-slate-100 flex items-center space-x-3">
+              <div className="w-9 h-9 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-black uppercase border border-indigo-200">
+                {currentUser.nama.slice(0, 2)}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-bold text-slate-800 truncate">{currentUser.nama}</p>
+                <span className={`inline-block text-[8px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full mt-0.5 ${
+                  currentUser.role === "owner" ? "bg-indigo-100 text-indigo-700 border border-indigo-200" : "bg-blue-100 text-blue-700 border border-blue-200"
+                }`}>
+                  {currentUser.role}
+                </span>
+              </div>
+            </div>
+
+            <nav className="p-4 space-y-1.5" id="navigation-links">
+              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest px-3 mb-2">Modul Toko</p>
+
+              {[
+                { key: "dashboard", icon: LayoutDashboard, label: `Dashboard ${currentUser.role === "owner" ? "Owner" : "Kasir"}` },
+                { key: "kasir", icon: Calculator, label: "Kasir (POS)" },
+                { key: "gudang", icon: Package, label: "Gudang & Persediaan" },
+                { key: "absensi", icon: Fingerprint, label: "Absensi Karyawan" },
+                { key: "catat_harian", icon: FileText, label: "Catatan Harian" },
+                { key: "laporan", icon: ClipboardList, label: "Laporan Laba Rugi" },
+              ].map(({ key, icon: Icon, label }) => (
+                <button
+                  key={key}
+                  onClick={() => handleNavigate(key)}
+                  className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold focus:outline-none transition-all cursor-pointer ${
+                    activeView === key
+                      ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-200 font-bold'
+                      : 'hover:bg-slate-100 text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  <span>{label}</span>
+                </button>
+              ))}
+
+              {currentUser.role === "owner" && (
+                <button
+                  onClick={() => handleNavigate("settings")}
+                  className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold focus:outline-none transition-all cursor-pointer ${
+                    activeView === "settings"
+                      ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-200 font-bold'
+                      : 'hover:bg-slate-100 text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <Settings className="w-4 h-4" />
+                  <span>Pengaturan & Akun</span>
+                </button>
+              )}
+            </nav>
           </div>
 
-          <div className="p-4 bg-slate-50/80 border-b border-slate-100 flex items-center space-x-3">
-            <div className="w-9 h-9 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-black uppercase border border-indigo-200">
-              {currentUser.nama.slice(0, 2)}
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-xs font-bold text-slate-800 truncate">{currentUser.nama}</p>
-              <span className={`inline-block text-[8px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full mt-0.5 ${
-                currentUser.role === "owner" ? "bg-indigo-100 text-indigo-700 border border-indigo-200" : "bg-blue-100 text-blue-700 border border-blue-200"
-              }`}>
-                {currentUser.role}
-              </span>
-            </div>
+          <div className="p-4 border-t border-slate-100">
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center space-x-3 px-3 py-2.5 hover:bg-rose-50 text-slate-500 hover:text-rose-600 rounded-xl text-xs font-bold transition-all focus:outline-none cursor-pointer"
+            >
+              <LogOut className="w-4 h-4" />
+              <span>Keluar Sesi</span>
+            </button>
           </div>
-
-          <nav className="p-4 space-y-1.5" id="navigation-links">
-            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest px-3 mb-2">Modul Toko</p>
-
-            {[
-              { key: "dashboard", icon: LayoutDashboard, label: `Dashboard ${currentUser.role === "owner" ? "Owner" : "Kasir"}` },
-              { key: "kasir", icon: Calculator, label: "Kasir (POS)" },
-              { key: "gudang", icon: Package, label: "Gudang & Persediaan" },
-              { key: "absensi", icon: Fingerprint, label: "Absensi Karyawan" },
-              { key: "catat_harian", icon: FileText, label: "Catatan Harian" },
-              { key: "laporan", icon: ClipboardList, label: "Laporan Laba Rugi" },
-            ].map(({ key, icon: Icon, label }) => (
-              <button
-                key={key}
-                onClick={() => setActiveView(key)}
-                className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold focus:outline-none transition-all cursor-pointer ${
-                  activeView === key
-                    ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-200 font-bold'
-                    : 'hover:bg-slate-100 text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                <Icon className="w-4 h-4" />
-                <span>{label}</span>
-              </button>
-            ))}
-
-            {currentUser.role === "owner" && (
-              <button
-                onClick={() => setActiveView("settings")}
-                className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold focus:outline-none transition-all cursor-pointer ${
-                  activeView === "settings"
-                    ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-200 font-bold'
-                    : 'hover:bg-slate-100 text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                <Settings className="w-4 h-4" />
-                <span>Pengaturan & Akun</span>
-              </button>
-            )}
-          </nav>
-        </div>
-
-        <div className="p-4 border-t border-slate-100">
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center space-x-3 px-3 py-2.5 hover:bg-rose-50 text-slate-500 hover:text-rose-600 rounded-xl text-xs font-bold transition-all focus:outline-none cursor-pointer"
-          >
-            <LogOut className="w-4 h-4" />
-            <span>Keluar Sesi</span>
-          </button>
-        </div>
-      </aside>
+        </aside>
+      </>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col min-w-0 bg-slate-50/50">
+      <main className="flex-1 flex flex-col min-w-0 bg-slate-50/50 pb-16 md:pb-0">
         <header className="bg-white border-b border-slate-200 p-4 flex justify-between items-center z-10 shadow-sm">
           <div className="flex items-center space-x-3">
+            {/* Hamburger button - visible on mobile */}
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="md:hidden p-2 -ml-1 hover:bg-slate-100 rounded-lg text-slate-500 transition-colors cursor-pointer"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
             <span className="text-indigo-700 font-extrabold text-xs uppercase tracking-wider bg-indigo-50 border border-indigo-100 px-2.5 py-1 rounded-md">
               Modul: {activeView.replace("_", " ")}
             </span>
@@ -494,7 +545,7 @@ export default function App() {
                 products={products}
                 attendance={attendanceList}
                 dailyLogs={dailyLogs}
-                onNavigate={setActiveView}
+                onNavigate={handleNavigate}
               />
             ) : (
               <DashboardKasir
@@ -502,7 +553,7 @@ export default function App() {
                 transactions={transactions}
                 attendance={attendanceList}
                 dailyLogs={dailyLogs}
-                onNavigate={setActiveView}
+                onNavigate={handleNavigate}
               />
             )
           )}
@@ -573,10 +624,32 @@ export default function App() {
         </div>
       </main>
 
+      {/* Bottom Tab Navigation - Mobile only */}
+      <nav className="md:hidden fixed bottom-0 inset-x-0 z-30 bg-white border-t border-slate-200 flex items-center justify-around safe-area-bottom shadow-sm">
+        {bottomNavItems.map(({ key, icon: Icon, label }) => (
+          <button
+            key={key}
+            onClick={() => handleNavigate(key)}
+            className={`flex flex-col items-center justify-center py-1.5 px-2 min-w-0 flex-1 transition-colors cursor-pointer ${
+              activeView === key
+                ? 'text-indigo-600'
+                : 'text-slate-400 hover:text-slate-600'
+            }`}
+          >
+            <div className={`p-1 rounded-lg ${activeView === key ? 'bg-indigo-50' : ''}`}>
+              <Icon className={`w-5 h-5 ${activeView === key ? 'text-indigo-600' : ''}`} />
+            </div>
+            <span className={`text-[10px] font-bold mt-0.5 leading-tight ${activeView === key ? 'text-indigo-600' : 'text-slate-400'}`}>
+              {label}
+            </span>
+          </button>
+        ))}
+      </nav>
+
       {/* Logout Modal */}
       {showLogoutModal && (
         <div className="fixed inset-0 bg-slate-900/60 flex items-center justify-center z-50 backdrop-blur-sm p-4" id="logout-confirm-modal">
-          <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl border border-slate-200">
+          <div className="bg-white rounded-2xl md:max-w-sm w-full max-w-none md:mx-0 mx-0 p-6 shadow-xl border border-slate-200 md:rounded-2xl rounded-none min-h-[280px] md:min-h-0 flex flex-col justify-center">
             <div className="flex flex-col items-center text-center space-y-4">
               <span className="p-3.5 bg-rose-50 text-rose-600 rounded-2xl border border-rose-100">
                 <LogOut className="w-6 h-6" />
@@ -593,7 +666,7 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => setShowLogoutModal(false)}
-                className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-colors cursor-pointer"
+                className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-sm font-bold transition-colors cursor-pointer"
               >
                 Batal
               </button>
@@ -604,7 +677,6 @@ export default function App() {
                   setCurrentUser(null);
                   setActiveView("dashboard");
                   setShowLogoutModal(false);
-                  // Clear all data
                   setUsers([]);
                   setProducts([]);
                   setTransactions([]);
@@ -612,7 +684,7 @@ export default function App() {
                   setAttendanceList([]);
                   setDailyLogs([]);
                 }}
-                className="flex-1 py-2.5 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold transition-colors shadow-sm shadow-rose-100 cursor-pointer"
+                className="flex-1 py-3 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-sm font-bold transition-colors shadow-sm shadow-rose-100 cursor-pointer"
               >
                 Ya, Keluar
               </button>
