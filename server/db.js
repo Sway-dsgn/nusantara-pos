@@ -135,6 +135,11 @@ async function initDB() {
     await client.query(`
       ALTER TABLE users ADD COLUMN IF NOT EXISTS domisili VARCHAR(200) NOT NULL DEFAULT '';
     `);
+    await client.query(`
+      ALTER TABLE store_profile ADD COLUMN IF NOT EXISTS pajak_aktif BOOLEAN NOT NULL DEFAULT false;
+      ALTER TABLE store_profile ADD COLUMN IF NOT EXISTS pajak_persen NUMERIC(5,2) NOT NULL DEFAULT 0;
+      ALTER TABLE store_profile ADD COLUMN IF NOT EXISTS no_rekening VARCHAR(50) NOT NULL DEFAULT '';
+    `);
 
     // Seed data
     const ownerCheck = await client.query('SELECT id FROM users WHERE username = $1', ['owner']);

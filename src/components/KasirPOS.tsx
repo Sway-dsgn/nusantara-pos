@@ -1004,15 +1004,27 @@ export default function KasirPOS({
                     <span>- {formatRupiah(createdTx.diskon)}</span>
                   </div>
                 )}
+                {storeProfile?.pajak_aktif && storeProfile.pajak_persen > 0 && (
+                  <div className="flex justify-between text-amber-700">
+                    <span>PPN {storeProfile.pajak_persen}%:</span>
+                    <span>+ {formatRupiah(Math.round((createdTx.total) * storeProfile.pajak_persen / 100))}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-sm border-t border-solid border-slate-300 pt-1 text-slate-900">
                   <span>TOTAL:</span>
-                  <span>{formatRupiah(createdTx.total)}</span>
+                  <span>{formatRupiah(storeProfile?.pajak_aktif && storeProfile.pajak_persen > 0 ? createdTx.total + Math.round(createdTx.total * storeProfile.pajak_persen / 100) : createdTx.total)}</span>
                 </div>
                 <div className="flex justify-between text-[9px] font-normal text-slate-500">
                   <span>Metode Bayar:</span>
                   <span className="uppercase">{createdTx.metode_bayar}</span>
                 </div>
               </div>
+
+              {storeProfile?.no_rekening && (
+                <div className="border-t border-dashed border-slate-300 pt-2 text-[9px] text-slate-500 text-center">
+                  <span className="font-semibold">No. Rekening:</span> {storeProfile.no_rekening}
+                </div>
+              )}
 
               {createdTx.metode_bayar === "qris" && (
                 <div className="border-t border-dashed border-slate-300 pt-3 flex flex-col items-center space-y-1.5 pb-1">

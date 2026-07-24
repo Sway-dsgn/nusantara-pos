@@ -63,6 +63,9 @@ export default function App() {
     no_hp: "",
     no_wa: "",
     footer: "Terima kasih atas kunjungan Anda!",
+    pajak_aktif: false,
+    pajak_persen: 0,
+    no_rekening: "",
   });
 
   // ─── Auth States ──────────────────────────────────────────────────────
@@ -361,6 +364,15 @@ export default function App() {
       }
     } catch (err) {
       console.error("Failed to update user:", err);
+    }
+  };
+
+  const handleUpdateStoreProfile = async (profile: StoreProfile) => {
+    try {
+      const saved = await storeProfileApi.update(profile);
+      setStoreProfile(saved);
+    } catch (err) {
+      console.error("Failed to update store profile:", err);
     }
   };
 
@@ -730,7 +742,7 @@ export default function App() {
               currentUser={currentUser}
               users={users}
               storeProfile={storeProfile}
-              onUpdateStoreProfile={setStoreProfile}
+              onUpdateStoreProfile={handleUpdateStoreProfile}
               onAddUser={handleAddUser}
               onUpdateUser={handleUpdateUser}
             />

@@ -14,7 +14,11 @@ import {
   Info, 
   Phone,
   MapPin,
-  FileText
+  FileText,
+  Percent,
+  Banknote,
+  ToggleLeft,
+  ToggleRight
 } from "lucide-react";
 import { User, StoreProfile } from "../types";
 
@@ -40,12 +44,18 @@ export default function KelolaAkun({
   const [storePhone, setStorePhone] = useState(storeProfile.no_hp);
   const [storeWa, setStoreWa] = useState(storeProfile.no_wa || "");
   const [storeFooter, setStoreFooter] = useState(storeProfile.footer);
+  const [pajakAktif, setPajakAktif] = useState(storeProfile.pajak_aktif);
+  const [pajakPersen, setPajakPersen] = useState(storeProfile.pajak_persen);
+  const [noRekening, setNoRekening] = useState(storeProfile.no_rekening || "");
 
   useEffect(() => {
     setStoreAddress(storeProfile.alamat);
     setStorePhone(storeProfile.no_hp);
     setStoreWa(storeProfile.no_wa || "");
     setStoreFooter(storeProfile.footer);
+    setPajakAktif(storeProfile.pajak_aktif);
+    setPajakPersen(storeProfile.pajak_persen);
+    setNoRekening(storeProfile.no_rekening || "");
   }, [storeProfile]);
 
   // User form states
@@ -153,7 +163,10 @@ export default function KelolaAkun({
       alamat: storeAddress,
       no_hp: storePhone,
       no_wa: storeWa,
-      footer: storeFooter
+      footer: storeFooter,
+      pajak_aktif: pajakAktif,
+      pajak_persen: pajakPersen,
+      no_rekening: noRekening
     });
     alert("Pengaturan Toko berhasil disimpan!");
   };
@@ -310,6 +323,55 @@ export default function KelolaAkun({
                 onChange={e => setStoreFooter(e.target.value)}
                 className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:bg-white"
               />
+            </div>
+
+            <div className="border-t border-slate-200 pt-4">
+              <p className="text-[10px] font-bold text-slate-700 uppercase mb-3 flex items-center gap-1">
+                <Percent className="w-3.5 h-3.5 text-indigo-500" /> Pajak & Pembayaran
+              </p>
+              <div className="flex items-center justify-between mb-3">
+                <label className="text-xs font-medium text-slate-600 flex items-center gap-1.5">
+                  {pajakAktif ? <ToggleRight className="w-4 h-4 text-indigo-600" /> : <ToggleLeft className="w-4 h-4 text-slate-400" />}
+                  Aktifkan Pajak (PPN)
+                </label>
+                <button
+                  onClick={() => setPajakAktif(!pajakAktif)}
+                  className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors cursor-pointer ${
+                    pajakAktif ? 'bg-indigo-600' : 'bg-slate-300'
+                  }`}
+                >
+                  <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${
+                    pajakAktif ? 'translate-x-[18px]' : 'translate-x-[2px]'
+                  }`} />
+                </button>
+              </div>
+              {pajakAktif && (
+                <div className="mb-3">
+                  <label className="block mb-1 text-slate-500 font-medium text-xs">Persentase Pajak (%)</label>
+                  <div className="flex items-center gap-2">
+                    <input 
+                      type="number" 
+                      step="0.1" min="0" max="100"
+                      value={pajakPersen}
+                      onChange={e => setPajakPersen(Number(e.target.value))}
+                      className="w-24 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:bg-white"
+                    />
+                    <span className="text-xs text-slate-500">%</span>
+                  </div>
+                </div>
+              )}
+              <div>
+                <label className="block mb-1 text-slate-500 font-medium flex items-center gap-1">
+                  <Banknote className="w-3.5 h-3.5 text-slate-400" /> No. Rekening (opsional)
+                </label>
+                <input 
+                  type="text" 
+                  placeholder="Contoh: 1234567890 a.n. Toko Nusantara"
+                  value={noRekening}
+                  onChange={e => setNoRekening(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:bg-white"
+                />
+              </div>
             </div>
 
             <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 text-slate-500 leading-relaxed font-normal">

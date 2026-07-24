@@ -19,7 +19,7 @@ router.get('/', verifyToken, async (req, res) => {
 
 // PUT /api/store-profile
 router.put('/', verifyToken, requireOwner, async (req, res) => {
-  const { nama, alamat, no_hp, no_wa, footer } = req.body;
+  const { nama, alamat, no_hp, no_wa, footer, pajak_aktif, pajak_persen, no_rekening } = req.body;
 
   try {
     const existing = await pool.query('SELECT * FROM store_profile WHERE id = 1');
@@ -30,14 +30,18 @@ router.put('/', verifyToken, requireOwner, async (req, res) => {
     const old = existing.rows[0];
 
     await pool.query(`
-      UPDATE store_profile SET nama = $1, alamat = $2, no_hp = $3, no_wa = $4, footer = $5
+      UPDATE store_profile SET nama = $1, alamat = $2, no_hp = $3, no_wa = $4, footer = $5,
+      pajak_aktif = $6, pajak_persen = $7, no_rekening = $8
       WHERE id = 1
     `, [
       nama ?? old.nama,
       alamat ?? old.alamat,
       no_hp ?? old.no_hp,
       no_wa ?? old.no_wa,
-      footer ?? old.footer
+      footer ?? old.footer,
+      pajak_aktif ?? old.pajak_aktif,
+      pajak_persen ?? old.pajak_persen,
+      no_rekening ?? old.no_rekening
     ]);
 
     const updated = await pool.query('SELECT * FROM store_profile WHERE id = 1');

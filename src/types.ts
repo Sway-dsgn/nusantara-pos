@@ -91,6 +91,9 @@ export interface StoreProfile {
   no_hp: string;
   no_wa?: string;
   footer: string;
+  pajak_aktif: boolean;
+  pajak_persen: number;
+  no_rekening?: string;
 }
 
 export interface CatatanHarian {
