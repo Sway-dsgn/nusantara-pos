@@ -178,18 +178,42 @@ export default function App() {
   };
 
   const handleUpdateProducts = (updatedProducts: Produk[]) => {
-    setProducts(updatedProducts);
+    setProducts(prev => {
+      const deleted = prev.filter(p => !updatedProducts.find(u => u.id === p.id));
+      for (const p of deleted) {
+        productsApi.remove(p.id).catch(console.error);
+      }
+      const edited = updatedProducts.filter(up => {
+        const old = prev.find(p => p.id === up.id);
+        return old && (JSON.stringify(old) !== JSON.stringify(up));
+      });
+      for (const p of edited) {
+        productsApi.update(p.id, p).catch(console.error);
+      }
+      return updatedProducts;
+    });
   };
 
   const handleAddProduct = async (newProd: Produk) => {
-    setProducts(prev => [...prev, newProd]);
+    try {
+      const created = await productsApi.create(newProd);
+      setProducts(prev => [...prev, created]);
+      return created;
+    } catch (err) {
+      console.error("Failed to add product:", err);
+      throw err;
+    }
   };
 
   const handleAddStockMovement = async (newMove: PergerakanStok) => {
-    setStockMovements(prev => [newMove, ...prev]);
-    // Refresh products to get updated stock
-    const freshProducts = await productsApi.list();
-    setProducts(freshProducts);
+    try {
+      const created = await stockMovementsApi.create(newMove);
+      setStockMovements(prev => [created, ...prev]);
+      const freshProducts = await productsApi.list();
+      setProducts(freshProducts);
+    } catch (err) {
+      console.error("Failed to add stock movement:", err);
+    }
   };
 
   const handleAddAttendance = (newAbs: Absensi) => {
@@ -214,13 +238,23 @@ export default function App() {
   };
 
   const handleAddUser = async (newUser: User) => {
-    setUsers(prev => [...prev, newUser]);
+    try {
+      const created = await usersApi.create(newUser);
+      setUsers(prev => [...prev, created]);
+    } catch (err) {
+      console.error("Failed to add user:", err);
+    }
   };
 
   const handleUpdateUser = async (updatedUser: User) => {
-    setUsers(prev => prev.map(u => u.id === updatedUser.id ? updatedUser : u));
-    if (currentUser && updatedUser.id === currentUser.id) {
-      setCurrentUser(updatedUser);
+    try {
+      const saved = await usersApi.update(updatedUser.id, updatedUser);
+      setUsers(prev => prev.map(u => u.id === saved.id ? saved : u));
+      if (currentUser && saved.id === currentUser.id) {
+        setCurrentUser(saved);
+      }
+    } catch (err) {
+      console.error("Failed to update user:", err);
     }
   };
 
