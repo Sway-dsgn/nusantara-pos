@@ -26,7 +26,7 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
   }
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 20000);
+  const timeoutId = setTimeout(() => controller.abort(), 30000);
 
   const res = await fetch(`${API_BASE}${endpoint}`, {
     ...options,

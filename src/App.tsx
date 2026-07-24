@@ -105,6 +105,7 @@ export default function App() {
   const [notifications, setNotifications] = useState<{ id: string; type: "low_stock" | "alert"; text: string }[]>([]);
   const [showNotifDropdown, setShowNotifDropdown] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   // ─── Data Fetching Functions ──────────────────────────────────────────
 
@@ -220,6 +221,8 @@ export default function App() {
       setTransactions(prev => [created, ...prev.filter(t => t.id !== newTx.id)]);
     } catch (err: any) {
       console.error("Gagal simpan transaksi ke server:", err.message || err);
+      setSaveError("Transaksi gagal disimpan ke server! Data hanya tersimpan sementara dan akan hilang saat reload.");
+      setTimeout(() => setSaveError(null), 8000);
     }
   };
 
@@ -269,6 +272,7 @@ export default function App() {
       setAttendanceList(prev => prev.map(a => a.id === newAbs.id ? created : a));
     } catch (err) {
       console.error("Gagal simpan absen ke server:", err);
+      setSaveError("Absen gagal disimpan ke server! Data hanya tersimpan sementara.");
     }
   };
 
@@ -489,6 +493,20 @@ export default function App() {
               className="px-2.5 py-1 bg-amber-100 hover:bg-amber-200 rounded-lg font-bold text-[10px] transition-colors flex-shrink-0 cursor-pointer"
             >
               Muat Ulang
+            </button>
+          </div>
+        )}
+        {saveError && (
+          <div className="bg-red-50 border-b border-red-200 px-4 py-2 text-xs text-red-800 flex items-center justify-between gap-2">
+            <span className="flex items-center gap-1.5">
+              <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
+              {saveError}
+            </span>
+            <button
+              onClick={() => setSaveError(null)}
+              className="px-2.5 py-1 bg-red-100 hover:bg-red-200 rounded-lg font-bold text-[10px] transition-colors flex-shrink-0 cursor-pointer"
+            >
+              Tutup
             </button>
           </div>
         )}
