@@ -207,11 +207,15 @@ export default function App() {
   // ─── Global State Mutations (API + local update) ─────────────────────
 
   const handleAddTransaction = async (newTx: Transaksi) => {
-    // newTx already has the server response (from KasirPOS which calls API)
-    setTransactions(prev => [newTx, ...prev]);
-    // Refresh products to get updated stock
-    const freshProducts = await productsApi.list();
-    setProducts(freshProducts);
+    try {
+      const created = await transactionsApi.create(newTx);
+      setTransactions(prev => [created, ...prev]);
+      const freshProducts = await productsApi.list();
+      setProducts(freshProducts);
+    } catch (err) {
+      console.error("Gagal simpan transaksi:", err);
+      alert("Gagal menyimpan transaksi. Periksa koneksi server.");
+    }
   };
 
   const handleUpdateProducts = (updatedProducts: Produk[]) => {
@@ -253,12 +257,25 @@ export default function App() {
     }
   };
 
-  const handleAddAttendance = (newAbs: Absensi) => {
-    setAttendanceList(prev => [newAbs, ...prev]);
+  const handleAddAttendance = async (newAbs: Absensi) => {
+    try {
+      const created = await attendanceApi.create(newAbs);
+      setAttendanceList(prev => [created, ...prev]);
+    } catch (err) {
+      console.error("Gagal simpan absen ke server:", err);
+    }
   };
 
-  const handleUpdateAttendance = (updatedList: Absensi[]) => {
+  const handleUpdateAttendance = async (updatedList: Absensi[]) => {
     setAttendanceList(updatedList);
+    const updatedRecord = updatedList.find(abs => abs.jam_pulang && !updatedList.find(a => a.id === abs.id && !a.jam_pulang));
+    if (updatedRecord?.jam_pulang) {
+      try {
+        await attendanceApi.update(updatedRecord.id, updatedRecord);
+      } catch (err) {
+        console.error("Gagal update absen ke server:", err);
+      }
+    }
   };
 
   const handleAddLog = (newLog: CatatanHarian) => {
