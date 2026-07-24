@@ -1,7 +1,13 @@
 import pg from 'pg';
 import bcrypt from 'bcryptjs';
 
-const { Pool } = pg;
+const { Pool, types } = pg;
+
+// Parse numeric types as float instead of string
+types.setTypeParser(types.builtins.NUMERIC, parseFloat);
+types.setTypeParser(types.builtins.INT8, parseInt);
+types.setTypeParser(types.builtins.INT4, parseInt);
+types.setTypeParser(types.builtins.INT2, parseInt);
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
