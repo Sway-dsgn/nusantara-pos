@@ -438,14 +438,14 @@ export default function LaporanKeuangan({
                 </div>
               </div>
               
-              <div className="h-60 w-full pt-2 relative" style={{ minHeight: 240 }}>
+              <div className="h-60 w-full pt-2 overflow-x-auto" style={{ minHeight: 240 }}>
+                <div className="text-[9px] text-slate-300 mb-1">lunas: {activeLunasTx.length}, chart: {dailyTrendData.length}</div>
                 {dailyTrendData.length === 0 ? (
                   <div className="flex items-center justify-center h-full text-xs text-slate-400">
                     Belum ada data transaksi lunas dalam rentang ini
                   </div>
                 ) : (
-                <ResponsiveContainer width="100%" height={240}>
-                  <AreaChart data={dailyTrendData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                  <AreaChart width={700} height={230} data={dailyTrendData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                     <defs>
                       <linearGradient id="omzetGradient" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.4}/>
@@ -477,7 +477,6 @@ export default function LaporanKeuangan({
                     />
                     <Area type="monotone" dataKey="omzet" stroke="#4f46e5" strokeWidth={3} fillOpacity={1} fill="url(#omzetGradient)" />
                   </AreaChart>
-                </ResponsiveContainer>
                 )}
               </div>
             </div>
