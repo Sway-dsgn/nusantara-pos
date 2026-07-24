@@ -4,6 +4,8 @@
  */
 
 import React, { useState, useMemo } from "react";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 import { 
   Search, 
   Trash2, 
@@ -1087,91 +1089,25 @@ export default function KasirPOS({
                 <Receipt className="w-4 h-4" /> Cetak Thermal / PDF Struk
               </button>
               <button 
-                onClick={() => {
+                onClick={async () => {
                   const receiptEl = document.getElementById("receipt-print-area");
                   if (!receiptEl) return;
-                  
-                  const receiptHTML = receiptEl.innerHTML;
-                  const style = `
-                    <style>
-                      @page { margin: 0; size: 80mm auto; }
-                      body { font-family: 'Courier New', monospace; font-size: 11px; color: #222; margin: 0; padding: 10px; }
-                      .text-center { text-align: center; }
-                      .space-y-1 > * + * { margin-top: 4px; }
-                      .space-y-4 > * + * { margin-top: 16px; }
-                      .border-t { border-top: 1px dashed #ccc; }
-                      .border-dashed { border-style: dashed; }
-                      .pt-2 { padding-top: 8px; }
-                      .pt-3 { padding-top: 12px; }
-                      .pb-1 { padding-bottom: 4px; }
-                      .flex { display: flex; }
-                      .justify-between { justify-content: space-between; }
-                      .items-center { align-items: center; }
-                      .font-bold { font-weight: bold; }
-                      .font-semibold { font-weight: 600; }
-                      .font-mono { font-family: 'Courier New', monospace; }
-                      .text-sm { font-size: 13px; }
-                      .text-xs { font-size: 11px; }
-                      .text-\\[10px\\] { font-size: 10px; }
-                      .text-\\[9px\\] { font-size: 9px; }
-                      .text-\\[8px\\] { font-size: 8px; }
-                      .text-\\[7px\\] { font-size: 7px; }
-                      .tracking-wider { letter-spacing: 1px; }
-                      .tracking-widest { letter-spacing: 2px; }
-                      .text-slate-400 { color: #94a3b8; }
-                      .text-slate-500 { color: #64748b; }
-                      .text-slate-800 { color: #1e293b; }
-                      .text-slate-900 { color: #0f172a; }
-                      .text-indigo-600 { color: #4f46e5; }
-                      .text-indigo-700 { color: #4338ca; }
-                      .text-amber-700 { color: #b45309; }
-                      .text-rose-500 { color: #f43f5e; }
-                      .text-center { text-align: center; }
-                      .space-y-1\\.5 > * + * { margin-top: 6px; }
-                      .flex-col { flex-direction: column; }
-                      .gap-1 { gap: 4px; }
-                      .gap-1\\.5 { gap: 6px; }
-                      .uppercase { text-transform: uppercase; }
-                      .flex { display: flex; }
-                      .shadow-inner { box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); }
-                      .rounded-xl { border-radius: 12px; }
-                      .p-4 { padding: 16px; }
-                      .bg-slate-50 { background: #f8fafc; }
-                      .border { border: 1px solid #e2e8f0; }
-                      .border-slate-200 { border-color: #e2e8f0; }
-                      .border-slate-300 { border-color: #cbd5e1; }
-                      .mt-0\\.5 { margin-top: 2px; }
-                      .mt-1 { margin-top: 4px; }
-                      .mb-1 { margin-bottom: 4px; }
-                      .text-\\[11px\\] { font-size: 11px; }
-                      .text-\\[12px\\] { font-size: 12px; }
-                      .w-20 { width: 80px; }
-                      .h-20 { height: 80px; }
-                      .mx-auto { margin: 0 auto; }
-                      img { max-width: 100%; }
-                    </style>
-                  `;
-                  
-                  const fullHTML = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Struk Belanja</title>${style}</head><body>${receiptHTML}</body></html>`;
-                  
-                  // Create a blob and share via Web Share API (mobile) or download
-                  const blob = new Blob([fullHTML], { type: 'text/html' });
-                  const file = new File([blob], `struk_${createdTx.id}.html`, { type: 'text/html' });
-                  
-                  if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                    navigator.share({ files: [file], title: 'Struk Belanja' });
-                  } else {
-                    // Fallback: open in new window and print (Save as PDF)
-                    const w = window.open('', '_blank');
-                    if (w) {
-                      w.document.write(fullHTML);
-                      w.document.close();
-                      w.focus();
-                      setTimeout(() => w.print(), 500);
+                  try {
+                    const canvas = await html2canvas(receiptEl, { scale: 2, backgroundColor: "#ffffff" });
+                    const imgData = canvas.toDataURL("image/png");
+                    const pdf = new jsPDF("p", "mm", [80, 300]);
+                    const pdfWidth = 80;
+                    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+                    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+                    const pdfBlob = pdf.output("blob");
+                    const file = new File([pdfBlob], `struk_${createdTx.id}.pdf`, { type: "application/pdf" });
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                      await navigator.share({ files: [file], title: "Struk Belanja" });
                     } else {
-                      // Popup blocked, fallback to normal print
-                      window.print();
+                      pdf.save(`struk_${createdTx.id}.pdf`);
                     }
+                  } catch {
+                    window.print();
                   }
                 }}
                 className="w-full py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 focus:outline-none"
