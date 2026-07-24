@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useMemo, useRef, useEffect } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import { 
   Fingerprint, 
   Clock, 
@@ -40,13 +40,10 @@ export default function AbsensiKaryawan({
   // States
   const [activeView, setActiveView] = useState<"absen_hari_ini" | "riwayat">("absen_hari_ini");
   
-  // Camera capture state
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
-  const [cameraActive, setCameraActive] = useState(false);
-  const [cameraError, setCameraError] = useState<string | null>(null);
+  // Camera capture state (native HP)
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [capturedPhoto, setCapturedPhoto] = useState<string | null>(null);
+  const [photoLoading, setPhotoLoading] = useState(false);
   const [capturedGps, setCapturedGps] = useState<string | null>(null);
   const [gpsError, setGpsError] = useState<string | null>(null);
   const [attendanceNote, setAttendanceNote] = useState("");
@@ -71,51 +68,35 @@ export default function AbsensiKaryawan({
     return attendanceList.find(abs => abs.tanggal === todayStr && abs.user_id === currentUser.id);
   }, [attendanceList, currentUser]);
 
-  // Cleanup camera stream on unmount
-  useEffect(() => {
-    return () => {
-      if (cameraStream) {
-        cameraStream.getTracks().forEach(t => t.stop());
-      }
+  // Open native camera HP via file input
+  const handleOpenCamera = () => {
+    fileInputRef.current?.click();
+  };
+
+  // Handle photo from native camera
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setPhotoLoading(true);
+    const reader = new FileReader();
+    reader.onload = () => {
+      setCapturedPhoto(reader.result as string);
+      setPhotoLoading(false);
     };
-  }, [cameraStream]);
-
-  // Open front camera
-  const handleOpenCamera = async () => {
-    setCameraError(null);
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "user", width: 320, height: 240 }
-      });
-      setCameraStream(stream);
-      setCameraActive(true);
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-      }
-    } catch (err: any) {
-      setCameraError("Gagal akses kamera: " + (err.message || "Izin ditolak"));
-    }
+    reader.onerror = () => {
+      setPhotoLoading(false);
+      alert("Gagal membaca foto");
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
   };
 
-  // Capture frame from video to canvas
-  const handleCapturePhoto = () => {
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    if (!video || !canvas) return;
-
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    ctx.drawImage(video, 0, 0);
-    const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
-    setCapturedPhoto(dataUrl);
-  };
-
-  // Retake photo (keep camera open)
+  // Retake photo
   const handleRetakePhoto = () => {
     setCapturedPhoto(null);
+    setCapturedGps(null);
+    setGpsError(null);
   };
 
   // Confirm photo + get GPS
@@ -137,17 +118,6 @@ export default function AbsensiKaryawan({
     } else {
       setCapturedGps("-6.2088, 106.8456");
     }
-  };
-
-  // Stop camera
-  const handleCloseCamera = () => {
-    if (cameraStream) {
-      cameraStream.getTracks().forEach(t => t.stop());
-    }
-    setCameraStream(null);
-    setCameraActive(false);
-    setCapturedPhoto(null);
-    setCameraError(null);
   };
 
   // Submit clock in
@@ -186,7 +156,7 @@ export default function AbsensiKaryawan({
     };
 
     onAddAttendance(newAttendance);
-    handleCloseCamera();
+    setCapturedPhoto(null);
     setCapturedGps(null);
     setAttendanceNote("");
     alert(`Absen Masuk Berhasil! Jam: ${jamMasukStr}. Status: ${finalStatus}`);
@@ -342,38 +312,23 @@ export default function AbsensiKaryawan({
             <div className="space-y-3 p-4 bg-slate-50 rounded-xl border border-dashed border-slate-200" id="absensi-verification">
               <span className="text-[10px] font-bold text-slate-400 uppercase block tracking-wider">Metode Validasi Kamera & GPS</span>
 
-              {/* Hidden canvas for capturing */}
-              <canvas ref={canvasRef} className="hidden" />
+              {/* Hidden file input for native camera */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                capture="user"
+                className="hidden"
+                onChange={handleFileChange}
+              />
 
-              {/* Camera preview */}
-              {cameraActive && !capturedPhoto && (
-                <div className="space-y-2">
-                  <div className="relative bg-black rounded-xl overflow-hidden">
-                    <video
-                      ref={videoRef}
-                      autoPlay
-                      playsInline
-                      muted
-                      className="w-full h-48 object-cover"
-                    />
-                    <button
-                      onClick={handleCloseCamera}
-                      className="absolute top-2 right-2 p-1 bg-black/50 text-white rounded-full hover:bg-black/70"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
+              {/* Loading state */}
+              {photoLoading && (
+                <div className="flex items-center justify-center py-8 bg-slate-50 rounded-xl">
+                  <div className="text-center space-y-2">
+                    <div className="w-8 h-8 border-3 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto" />
+                    <p className="text-[10px] text-slate-500 font-medium">Memproses foto...</p>
                   </div>
-                  {cameraError && (
-                    <p className="text-[10px] text-red-500 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" /> {cameraError}
-                    </p>
-                  )}
-                  <button
-                    onClick={handleCapturePhoto}
-                    className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2"
-                  >
-                    <Camera className="w-4 h-4" /> Ambil Foto
-                  </button>
                 </div>
               )}
 
@@ -416,8 +371,8 @@ export default function AbsensiKaryawan({
                 </div>
               )}
 
-              {/* Open camera button (shown when camera is not active) */}
-              {!cameraActive && !capturedPhoto && (
+              {/* Open camera button */}
+              {!capturedPhoto && !photoLoading && (
                 <button 
                   onClick={handleOpenCamera}
                   className="w-full py-3 bg-white hover:bg-slate-100 border border-slate-200 rounded-xl text-center text-xs font-semibold text-slate-600 transition-colors flex items-center justify-center gap-1.5 focus:outline-none cursor-pointer"
