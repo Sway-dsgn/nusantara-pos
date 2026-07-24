@@ -97,29 +97,48 @@ export default function App() {
   // ─── Notifications ────────────────────────────────────────────────────
   const [notifications, setNotifications] = useState<{ id: string; type: "low_stock" | "alert"; text: string }[]>([]);
   const [showNotifDropdown, setShowNotifDropdown] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
   // ─── Data Fetching Functions ──────────────────────────────────────────
 
   const fetchAllData = useCallback(async () => {
-    try {
-      const [usersData, productsData, txData, stockData, absData, logsData, profileData] = await Promise.all([
-        usersApi.list(),
-        productsApi.list(),
-        transactionsApi.list(),
-        stockMovementsApi.list(),
-        attendanceApi.list(),
-        dailyLogsApi.list(),
-        storeProfileApi.get(),
-      ]);
-      setUsers(usersData);
-      setProducts(productsData);
-      setTransactions(txData);
-      setStockMovements(stockData);
-      setAttendanceList(absData);
-      setDailyLogs(logsData);
-      setStoreProfile(profileData);
-    } catch (err) {
-      console.error("Failed to fetch data:", err);
+    setFetchError(null);
+    const results = await Promise.allSettled([
+      usersApi.list(),
+      productsApi.list(),
+      transactionsApi.list(),
+      stockMovementsApi.list(),
+      attendanceApi.list(),
+      dailyLogsApi.list(),
+      storeProfileApi.get(),
+    ]);
+
+    const [usersRes, productsRes, txRes, stockRes, absRes, logsRes, profileRes] = results;
+
+    if (usersRes.status === "fulfilled") setUsers(usersRes.value);
+    else console.error("Gagal ambil users:", usersRes.reason);
+
+    if (productsRes.status === "fulfilled") setProducts(productsRes.value);
+    else console.error("Gagal ambil products:", productsRes.reason);
+
+    if (txRes.status === "fulfilled") setTransactions(txRes.value);
+    else console.error("Gagal ambil transactions:", txRes.reason);
+
+    if (stockRes.status === "fulfilled") setStockMovements(stockRes.value);
+    else console.error("Gagal ambil stock:", stockRes.reason);
+
+    if (absRes.status === "fulfilled") setAttendanceList(absRes.value);
+    else console.error("Gagal ambil attendance:", absRes.reason);
+
+    if (logsRes.status === "fulfilled") setDailyLogs(logsRes.value);
+    else console.error("Gagal ambil daily logs:", logsRes.reason);
+
+    if (profileRes.status === "fulfilled") setStoreProfile(profileRes.value);
+    else console.error("Gagal ambil store profile:", profileRes.reason);
+
+    const failedCount = results.filter(r => r.status === "rejected").length;
+    if (failedCount > 0) {
+      setFetchError(`${failedCount} dari 7 data gagal dimuat. Beberapa fitur mungkin kosong.`);
     }
   }, []);
 
@@ -431,6 +450,20 @@ export default function App() {
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 bg-slate-50/50 pb-16 md:pb-0">
+        {fetchError && (
+          <div className="bg-amber-50 border-b border-amber-200 px-4 py-2 text-xs text-amber-800 flex items-center justify-between gap-2">
+            <span className="flex items-center gap-1.5">
+              <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
+              {fetchError}
+            </span>
+            <button
+              onClick={() => { setFetchError(null); fetchAllData(); }}
+              className="px-2.5 py-1 bg-amber-100 hover:bg-amber-200 rounded-lg font-bold text-[10px] transition-colors flex-shrink-0 cursor-pointer"
+            >
+              Muat Ulang
+            </button>
+          </div>
+        )}
         <header className="bg-white border-b border-slate-200 p-4 flex justify-between items-center z-10 shadow-sm">
           <div className="flex items-center space-x-3">
             {/* Hamburger button - visible on mobile */}
