@@ -149,12 +149,13 @@ export default function App() {
       authApi.me()
         .then((res) => {
           setCurrentUser(res.user);
-          return fetchAllData();
+          setLoading(false);
+          fetchAllData();
         })
         .catch(() => {
           setToken(null);
-        })
-        .finally(() => setLoading(false));
+          setLoading(false);
+        });
     } else {
       setLoading(false);
     }
@@ -187,8 +188,7 @@ export default function App() {
       setLoginUsername("");
       setLoginPassword("");
       setLoginError("");
-      // Fetch all data after login
-      await fetchAllData();
+      fetchAllData();
     } catch (err: any) {
       setLoginError(err.message || "Username atau Kata Sandi salah!");
     }
