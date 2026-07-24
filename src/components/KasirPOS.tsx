@@ -482,20 +482,20 @@ export default function KasirPOS({
 
           {filteredMyTransactions.length > 0 ? (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs text-slate-500">
+              <table className="w-full text-left text-xs text-slate-500 min-w-[900px]">
                 <thead className="text-[10px] text-slate-400 uppercase bg-slate-50/50">
                   <tr>
-                    <th className="py-2 px-3">Waktu</th>
-                    <th className="py-2 px-3">Kode TX</th>
-                    <th className="py-2 px-3">Pelanggan</th>
-                    <th className="py-2 px-3">No. WA</th>
-                    <th className="py-2 px-3">Domisili</th>
-                    {currentUser.role === "owner" && <th className="py-2 px-3">Kasir</th>}
-                    <th className="py-2 px-3">Jml</th>
-                    <th className="py-2 px-3">Total</th>
-                    <th className="py-2 px-3">Metode</th>
-                    <th className="py-2 px-3">Status</th>
-                    <th className="py-2 px-3 text-right">Aksi</th>
+                    <th className="py-2 px-3 whitespace-nowrap">Waktu</th>
+                    <th className="py-2 px-3 whitespace-nowrap">Kode TX</th>
+                    <th className="py-2 px-3 whitespace-nowrap">Pelanggan</th>
+                    <th className="py-2 px-3 whitespace-nowrap">No. WA</th>
+                    <th className="py-2 px-3 whitespace-nowrap">Domisili</th>
+                    {currentUser.role === "owner" && <th className="py-2 px-3 whitespace-nowrap">Kasir</th>}
+                    <th className="py-2 px-3 whitespace-nowrap">Jml</th>
+                    <th className="py-2 px-3 whitespace-nowrap">Total</th>
+                    <th className="py-2 px-3 whitespace-nowrap">Metode</th>
+                    <th className="py-2 px-3 whitespace-nowrap">Status</th>
+                    <th className="py-2 px-3 whitespace-nowrap text-right">Aksi</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">

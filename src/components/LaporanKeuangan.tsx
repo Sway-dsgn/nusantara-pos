@@ -576,22 +576,22 @@ export default function LaporanKeuangan({
               </button>
             </div>
 
-            <div className="hidden md:block overflow-x-auto">
-              <table className="w-full text-left text-xs text-slate-500">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs text-slate-500 min-w-[1000px]">
                 <thead className="text-[10px] text-slate-400 uppercase bg-slate-50/50">
                   <tr>
-                    <th className="py-2 px-3">Kode TX</th>
-                    <th className="py-2 px-3">Tanggal / Waktu</th>
-                    <th className="py-2 px-3">Melayani</th>
-                    <th className="py-2 px-3">Pelanggan</th>
-                    <th className="py-2 px-3">No. WA</th>
-                    <th className="py-2 px-3">Domisili</th>
-                    <th className="py-2 px-3">Barang Terbeli</th>
-                    <th className="py-2 px-3">Subtotal Diskon</th>
-                    <th className="py-2 px-3">Jml</th>
-                    <th className="py-2 px-3">Total Akhir</th>
-                    <th className="py-2 px-3">Pembayaran</th>
-                    <th className="py-2 px-3">Status</th>
+                    <th className="py-2 px-3 whitespace-nowrap">Kode TX</th>
+                    <th className="py-2 px-3 whitespace-nowrap">Tanggal / Waktu</th>
+                    <th className="py-2 px-3 whitespace-nowrap">Melayani</th>
+                    <th className="py-2 px-3 whitespace-nowrap">Pelanggan</th>
+                    <th className="py-2 px-3 whitespace-nowrap">No. WA</th>
+                    <th className="py-2 px-3 whitespace-nowrap">Domisili</th>
+                    <th className="py-2 px-3 whitespace-nowrap">Barang Terbeli</th>
+                    <th className="py-2 px-3 whitespace-nowrap">Subtotal Diskon</th>
+                    <th className="py-2 px-3 whitespace-nowrap">Jml</th>
+                    <th className="py-2 px-3 whitespace-nowrap">Total Akhir</th>
+                    <th className="py-2 px-3 whitespace-nowrap">Pembayaran</th>
+                    <th className="py-2 px-3 whitespace-nowrap">Status</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200 font-medium">
