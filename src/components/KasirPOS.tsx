@@ -48,12 +48,9 @@ export default function KasirPOS({
   onLogStockMovement
 }: KasirPOSProps) {
   // LocalStorage fallback for pajak & rekening settings
-  const lsPajakAktif = localStorage.getItem("kp_pajakAktif") === "true";
-  const lsPajakPersen = Number(localStorage.getItem("kp_pajakPersen")) || 0;
-  const lsNoRekening = localStorage.getItem("kp_noRekening") || "";
-  const pajakAktif = storeProfile?.pajak_aktif ?? lsPajakAktif;
-  const pajakPersen = storeProfile?.pajak_persen ?? lsPajakPersen;
-  const noRekeningToko = storeProfile?.no_rekening || lsNoRekening;
+  const pajakAktif = localStorage.getItem("kp_pajakAktif") !== null ? localStorage.getItem("kp_pajakAktif") === "true" : (storeProfile?.pajak_aktif ?? false);
+  const pajakPersen = localStorage.getItem("kp_pajakPersen") !== null ? Number(localStorage.getItem("kp_pajakPersen")) : (storeProfile?.pajak_persen ?? 0);
+  const noRekeningToko = localStorage.getItem("kp_noRekening") || storeProfile?.no_rekening || "";
 
   // POS States
   const todayStr = new Date().toISOString().split("T")[0];
