@@ -263,9 +263,10 @@ export default function App() {
   };
 
   const handleAddAttendance = async (newAbs: Absensi) => {
+    setAttendanceList(prev => [newAbs, ...prev]);
     try {
       const created = await attendanceApi.create(newAbs);
-      setAttendanceList(prev => [created, ...prev]);
+      setAttendanceList(prev => prev.map(a => a.id === newAbs.id ? created : a));
     } catch (err) {
       console.error("Gagal simpan absen ke server:", err);
     }
