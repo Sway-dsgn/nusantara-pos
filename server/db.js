@@ -132,6 +132,9 @@ async function initDB() {
       ALTER TABLE attendance ADD COLUMN IF NOT EXISTS foto TEXT;
       ALTER TABLE attendance ADD COLUMN IF NOT EXISTS gps VARCHAR(50);
     `);
+    await client.query(`
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS domisili VARCHAR(200) NOT NULL DEFAULT '';
+    `);
 
     // Seed data
     const ownerCheck = await client.query('SELECT id FROM users WHERE username = $1', ['owner']);

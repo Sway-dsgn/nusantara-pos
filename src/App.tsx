@@ -94,6 +94,13 @@ export default function App() {
     }
   }, [activeView]);
 
+  // ─── Refresh users when entering settings ───────────────────────────
+  useEffect(() => {
+    if (activeView === "settings") {
+      usersApi.list().then(setUsers).catch(console.error);
+    }
+  }, [activeView]);
+
   // ─── Close sidebar on view change (mobile) ──────────────────────────
   const handleNavigate = (view: string) => {
     setActiveView(view);
@@ -331,8 +338,10 @@ export default function App() {
     try {
       const created = await usersApi.create(newUser);
       setUsers(prev => [...prev, created]);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to add user:", err);
+      setSaveError(`Gagal tambah user: ${err.message || err}`);
+      setTimeout(() => setSaveError(null), 8000);
     }
   };
 
