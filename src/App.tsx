@@ -283,8 +283,13 @@ export default function App() {
     }
   };
 
-  const handleAddLog = (newLog: CatatanHarian) => {
-    setDailyLogs(prev => [newLog, ...prev]);
+  const handleAddLog = async (newLog: CatatanHarian) => {
+    try {
+      const created = await dailyLogsApi.create(newLog);
+      setDailyLogs(prev => [created, ...prev]);
+    } catch (err) {
+      console.error("Gagal simpan catatan:", err);
+    }
   };
 
   const handleDeleteLog = async (id: string) => {
