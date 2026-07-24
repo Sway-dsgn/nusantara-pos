@@ -85,6 +85,10 @@ export default function App() {
     if (activeView === "kasir" || activeView === "gudang") {
       productsApi.list().then(setProducts).catch(console.error);
     }
+  }, [activeView]);
+
+  // ─── Refresh transactions when entering dashboard or laporan ───────
+  useEffect(() => {
     if (activeView === "dashboard" || activeView === "laporan") {
       transactionsApi.list().then(setTransactions).catch(console.error);
     }
