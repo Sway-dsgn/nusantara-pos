@@ -56,6 +56,7 @@ export default function KasirPOS({
   // Customer info
   const [customerName, setCustomerName] = useState("");
   const [customerWa, setCustomerWa] = useState("");
+  const [customerDomisili, setCustomerDomisili] = useState("");
 
   // Discount & Approvals
   const [discountInput, setDiscountInput] = useState<number>(0);
@@ -254,6 +255,7 @@ export default function KasirPOS({
       status: "lunas",
       pelanggan_nama: customerName.trim() || undefined,
       pelanggan_wa: customerWa.trim() || undefined,
+      pelanggan_domisili: customerDomisili.trim() || undefined,
       items: detailItems
     };
 
@@ -290,6 +292,7 @@ export default function KasirPOS({
     setAppliedDiscount(0);
     setCustomerName("");
     setCustomerWa("");
+    setCustomerDomisili("");
     setPaymentMethod("tunai");
     setCashAmountInput("");
     setCheckoutSuccess(false);
@@ -610,20 +613,27 @@ export default function KasirPOS({
           </div>
 
           {/* Customer Info (opsional) */}
-          <div className="px-4 py-2 border-t border-slate-200">
+          <div className="px-4 py-2 border-t border-slate-200 space-y-2">
+            <input
+              type="text"
+              placeholder="Nama Pelanggan (opsional)"
+              value={customerName}
+              onChange={e => setCustomerName(e.target.value)}
+              className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            />
             <div className="grid grid-cols-2 gap-2">
               <input
                 type="text"
-                placeholder="Nama Pelanggan (opsional)"
-                value={customerName}
-                onChange={e => setCustomerName(e.target.value)}
+                placeholder="No. WA (opsional)"
+                value={customerWa}
+                onChange={e => setCustomerWa(e.target.value)}
                 className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
               />
               <input
                 type="text"
-                placeholder="No. WA Pelanggan (opsional)"
-                value={customerWa}
-                onChange={e => setCustomerWa(e.target.value)}
+                placeholder="Domisili (opsional)"
+                value={customerDomisili}
+                onChange={e => setCustomerDomisili(e.target.value)}
                 className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
               />
             </div>
@@ -954,6 +964,12 @@ export default function KasirPOS({
                     <div className="flex justify-between">
                       <span>WA:</span>
                       <span>{createdTx.pelanggan_wa}</span>
+                    </div>
+                  )}
+                  {createdTx.pelanggan_domisili && (
+                    <div className="flex justify-between">
+                      <span>Domisili:</span>
+                      <span>{createdTx.pelanggan_domisili}</span>
                     </div>
                   )}
                 </div>
