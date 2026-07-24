@@ -284,10 +284,10 @@ export default function App() {
     try {
       const created = await attendanceApi.create(newAbs);
       setAttendanceList(prev => prev.map(a => a.id === newAbs.id ? created : a));
-    } catch (err) {
+    } catch (err: any) {
       console.error("Gagal simpan absen ke server:", err);
-      setSaveError("Absen gagal disimpan ke server! Data hanya tersimpan sementara.");
-      setTimeout(() => setSaveError(null), 8000);
+      setSaveError(`Absen gagal: ${err.message || err}. Data cuma sementara.`);
+      setTimeout(() => setSaveError(null), 10000);
       setTimeout(() => {
         attendanceApi.create(newAbs).then(created => {
           setAttendanceList(prev => prev.map(a => a.id === newAbs.id ? created : a));
