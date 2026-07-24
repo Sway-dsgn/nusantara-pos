@@ -210,7 +210,7 @@ export default function App() {
     setTransactions(prev => [newTx, ...prev]);
     try {
       const created = await transactionsApi.create(newTx);
-      setTransactions(prev => prev.map(t => t.id === newTx.id ? created : t));
+      setTransactions(prev => [created, ...prev.filter(t => t.id !== newTx.id)]);
       const freshProducts = await productsApi.list();
       setProducts(freshProducts);
     } catch (err: any) {
