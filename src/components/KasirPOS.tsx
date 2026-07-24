@@ -18,7 +18,8 @@ import {
   DollarSign,
   Undo2,
   Lock,
-  ArrowRight
+  ArrowRight,
+  MessageCircle
 } from "lucide-react";
 import { User, Produk, Transaksi, DetailTransaksi, MetodeBayar, StatusTransaksi, StoreProfile } from "../types";
 
@@ -646,13 +647,6 @@ export default function KasirPOS({
                 className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
               />
             </div>
-            <input
-              type="text"
-              placeholder="No. Rekening Pembeli (opsional)"
-              value={customerRekening}
-              onChange={e => setCustomerRekening(e.target.value)}
-              className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-            />
           </div>
 
           {/* Pricing & Checkout Methods Form */}
@@ -781,6 +775,14 @@ export default function KasirPOS({
                 <p className="text-[9px] text-indigo-600">Pelanggan dapat melakukan scan barcode QRIS yang akan muncul di struk belanja setelah menekan tombol "Proses Transaksi".</p>
               </div>
             )}
+
+            <input
+              type="text"
+              placeholder="No. Rekening Pembeli (opsional)"
+              value={customerRekening}
+              onChange={e => setCustomerRekening(e.target.value)}
+              className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            />
 
             {/* Pay Button */}
             <button 
@@ -1073,11 +1075,25 @@ export default function KasirPOS({
               </button>
               <button 
                 onClick={() => {
-                  alert("Mockup: Struk belanja berhasil dikirimkan ke WhatsApp pelanggan!");
+                  const wa = createdTx.pelanggan_wa;
+                  if (!wa) {
+                    alert("Pelanggan tidak memiliki nomor WhatsApp tercantum!");
+                    return;
+                  }
+                  const cleanNum = wa.replace(/[^0-9]/g, "");
+                  const internationalNum = cleanNum.startsWith("0") ? "62" + cleanNum.slice(1) : cleanNum;
+                  
+                  const items = createdTx.items.map(i => `  ${i.produk_nama} ${i.qty}x ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(i.subtotal)}`).join("\n");
+                  const pajakLine = storeProfile?.pajak_aktif && storeProfile.pajak_persen > 0 ? `\nPPN ${storeProfile.pajak_persen}%: ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(Math.round(createdTx.total * storeProfile.pajak_persen / 100))}` : "";
+                  const grandTotal = storeProfile?.pajak_aktif && storeProfile.pajak_persen > 0 ? createdTx.total + Math.round(createdTx.total * storeProfile.pajak_persen / 100) : createdTx.total;
+                  
+                  const msg = `🧾 *${storeProfile?.nama || "NUSANTARA POS"}*\n${storeProfile?.alamat || ""}\n\n*STRUK BELANJA*\nKode: ${createdTx.id}\nTgl: ${new Date(createdTx.tanggal).toLocaleString("id-ID")}\nKasir: ${createdTx.kasir_nama}${createdTx.pelanggan_nama ? `\nPelanggan: ${createdTx.pelanggan_nama}` : ""}\n\n${items}\n\nSubtotal: ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(createdTx.items.reduce((s, i) => s + i.subtotal, 0))}${createdTx.diskon > 0 ? `\nDiskon: -${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(createdTx.diskon)}` : ""}${pajakLine}\n*TOTAL: ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(grandTotal)}*\n\nTerima kasih atas kunjungan Anda!`;
+                  
+                  window.open(`https://wa.me/${internationalNum}?text=${encodeURIComponent(msg)}`, "_blank");
                 }}
                 className="w-full py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 focus:outline-none"
               >
-                Share ke WhatsApp (Mock)
+                <MessageCircle className="w-4 h-4" /> Kirim Struk ke WA Pelanggan
               </button>
               <button 
                 onClick={handleResetPOS}
