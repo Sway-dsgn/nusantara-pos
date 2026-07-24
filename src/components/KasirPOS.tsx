@@ -259,7 +259,7 @@ export default function KasirPOS({
       tanggal: new Date().toISOString(),
       kasir_id: currentUser.id,
       kasir_nama: currentUser.nama,
-      total: cartTotal,
+      total: cartTotal + (pajakAktif && pajakPersen > 0 ? Math.round(cartTotal * pajakPersen / 100) : 0),
       diskon: appliedDiscount,
       metode_bayar: paymentMethod,
       status: "lunas",
@@ -1035,12 +1035,12 @@ export default function KasirPOS({
                 {pajakAktif && pajakPersen > 0 && (
                   <div className="flex justify-between text-amber-700">
                     <span>PPN {pajakPersen}%:</span>
-                    <span>+ {formatRupiah(Math.round((createdTx.total) * pajakPersen / 100))}</span>
+                    <span>+ {formatRupiah(Math.round((createdTx.items.reduce((s, i) => s + i.subtotal, 0) - (createdTx.diskon || 0)) * pajakPersen / 100))}</span>
                   </div>
                 )}
                 <div className="flex justify-between text-sm border-t border-solid border-slate-300 pt-1 text-slate-900">
                   <span>TOTAL:</span>
-                  <span>{formatRupiah(pajakAktif && pajakPersen > 0 ? createdTx.total + Math.round(createdTx.total * pajakPersen / 100) : createdTx.total)}</span>
+                  <span>{formatRupiah(createdTx.total)}</span>
                 </div>
                 <div className="flex justify-between text-[9px] font-normal text-slate-500">
                   <span>Metode Bayar:</span>
