@@ -260,6 +260,64 @@ export default function KelolaAkun({
             </table>
           </div>
         </div>
+
+        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+          <div className="flex items-center space-x-2">
+            <span className="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg">
+              <Percent className="w-5 h-5" />
+            </span>
+            <div>
+              <h4 className="text-sm font-bold text-slate-800">Pengaturan Pajak & Pembayaran</h4>
+              <p className="text-[10px] text-slate-400 mt-0.5">Aktifkan PPN dan masukkan nomor rekening toko</p>
+            </div>
+          </div>
+
+          <div className="space-y-4 text-xs font-semibold text-slate-700">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-medium text-slate-600 flex items-center gap-1.5">
+                {pajakAktif ? <ToggleRight className="w-4 h-4 text-indigo-600" /> : <ToggleLeft className="w-4 h-4 text-slate-400" />}
+                Aktifkan Pajak (PPN)
+              </label>
+              <button
+                onClick={() => setPajakAktif(!pajakAktif)}
+                className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors cursor-pointer ${
+                  pajakAktif ? 'bg-indigo-600' : 'bg-slate-300'
+                }`}
+              >
+                <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${
+                  pajakAktif ? 'translate-x-[18px]' : 'translate-x-[2px]'
+                }`} />
+              </button>
+            </div>
+            {pajakAktif && (
+              <div>
+                <label className="block mb-1 text-slate-500 font-medium">Persentase Pajak (%)</label>
+                <div className="flex items-center gap-2">
+                  <input 
+                    type="number" 
+                    step="0.1" min="0" max="100"
+                    value={pajakPersen}
+                    onChange={e => setPajakPersen(Number(e.target.value))}
+                    className="w-24 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:bg-white"
+                  />
+                  <span className="text-xs text-slate-500">%</span>
+                </div>
+              </div>
+            )}
+            <div>
+              <label className="block mb-1 text-slate-500 font-medium flex items-center gap-1">
+                <Banknote className="w-3.5 h-3.5 text-slate-400" /> No. Rekening (opsional)
+              </label>
+              <input 
+                type="text" 
+                placeholder="Contoh: 1234567890 a.n. Toko Nusantara"
+                value={noRekening}
+                onChange={e => setNoRekening(e.target.value)}
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:bg-white"
+              />
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* RIGHT: Store Profile Configuration (5 Cols) */}
@@ -323,55 +381,6 @@ export default function KelolaAkun({
                 onChange={e => setStoreFooter(e.target.value)}
                 className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:bg-white"
               />
-            </div>
-
-            <div className="border-t border-slate-200 pt-4">
-              <p className="text-[10px] font-bold text-slate-700 uppercase mb-3 flex items-center gap-1">
-                <Percent className="w-3.5 h-3.5 text-indigo-500" /> Pajak & Pembayaran
-              </p>
-              <div className="flex items-center justify-between mb-3">
-                <label className="text-xs font-medium text-slate-600 flex items-center gap-1.5">
-                  {pajakAktif ? <ToggleRight className="w-4 h-4 text-indigo-600" /> : <ToggleLeft className="w-4 h-4 text-slate-400" />}
-                  Aktifkan Pajak (PPN)
-                </label>
-                <button
-                  onClick={() => setPajakAktif(!pajakAktif)}
-                  className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors cursor-pointer ${
-                    pajakAktif ? 'bg-indigo-600' : 'bg-slate-300'
-                  }`}
-                >
-                  <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${
-                    pajakAktif ? 'translate-x-[18px]' : 'translate-x-[2px]'
-                  }`} />
-                </button>
-              </div>
-              {pajakAktif && (
-                <div className="mb-3">
-                  <label className="block mb-1 text-slate-500 font-medium text-xs">Persentase Pajak (%)</label>
-                  <div className="flex items-center gap-2">
-                    <input 
-                      type="number" 
-                      step="0.1" min="0" max="100"
-                      value={pajakPersen}
-                      onChange={e => setPajakPersen(Number(e.target.value))}
-                      className="w-24 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:bg-white"
-                    />
-                    <span className="text-xs text-slate-500">%</span>
-                  </div>
-                </div>
-              )}
-              <div>
-                <label className="block mb-1 text-slate-500 font-medium flex items-center gap-1">
-                  <Banknote className="w-3.5 h-3.5 text-slate-400" /> No. Rekening (opsional)
-                </label>
-                <input 
-                  type="text" 
-                  placeholder="Contoh: 1234567890 a.n. Toko Nusantara"
-                  value={noRekening}
-                  onChange={e => setNoRekening(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:bg-white"
-                />
-              </div>
             </div>
 
             <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 text-slate-500 leading-relaxed font-normal">
