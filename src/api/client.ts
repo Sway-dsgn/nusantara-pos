@@ -25,10 +25,16 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
     headers['Authorization'] = `Bearer ${token}`;
   }
 
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 20000);
+
   const res = await fetch(`${API_BASE}${endpoint}`, {
     ...options,
     headers,
+    signal: controller.signal,
   });
+
+  clearTimeout(timeoutId);
 
   if (res.status === 401) {
     removeToken();
@@ -113,11 +119,17 @@ export async function uploadFile(file: File) {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 30000);
+
   const res = await fetch(`${API_BASE}/upload`, {
     method: 'POST',
     headers,
     body: formData,
+    signal: controller.signal,
   });
+
+  clearTimeout(timeoutId);
 
   const data = await res.json();
   if (!res.ok) {

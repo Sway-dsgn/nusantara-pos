@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import { 
   Fingerprint, 
   Clock, 
@@ -15,7 +15,8 @@ import {
   Edit2,
   Calendar,
   X,
-  FileCheck
+  FileCheck,
+  RefreshCw
 } from "lucide-react";
 import { User, Absensi, StatusAbsensi } from "../types";
 
@@ -39,9 +40,15 @@ export default function AbsensiKaryawan({
   // States
   const [activeView, setActiveView] = useState<"absen_hari_ini" | "riwayat">("absen_hari_ini");
   
-  // Selfie simulation state
-  const [simulatedSelfieUrl, setSimulatedSelfieUrl] = useState<string | null>(null);
-  const [simulatedGps, setSimulatedGps] = useState<string | null>(null);
+  // Camera capture state
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
+  const [cameraActive, setCameraActive] = useState(false);
+  const [cameraError, setCameraError] = useState<string | null>(null);
+  const [capturedPhoto, setCapturedPhoto] = useState<string | null>(null);
+  const [capturedGps, setCapturedGps] = useState<string | null>(null);
+  const [gpsError, setGpsError] = useState<string | null>(null);
   const [attendanceNote, setAttendanceNote] = useState("");
   const [statusSelector, setStatusSelector] = useState<StatusAbsensi>("Hadir");
 
@@ -64,19 +71,83 @@ export default function AbsensiKaryawan({
     return attendanceList.find(abs => abs.tanggal === todayStr && abs.user_id === currentUser.id);
   }, [attendanceList, currentUser]);
 
-  // Capture simulated selfie helper
-  const handleTakeSelfie = () => {
-    // Array of beautiful avatar/selfie mocks of smiling baristas/employees
-    const baristas = [
-      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80",
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80",
-      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80"
-    ];
-    const randomIndex = currentUser.id === "usr-2" ? 1 : 0; // consistent avatar per user
-    setSimulatedSelfieUrl(baristas[randomIndex]);
-    
-    // Set mock coordinates
-    setSimulatedGps("-6.2088, 106.8456"); // Jakarta dynamic coordinates mockup
+  // Cleanup camera stream on unmount
+  useEffect(() => {
+    return () => {
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(t => t.stop());
+      }
+    };
+  }, [cameraStream]);
+
+  // Open front camera
+  const handleOpenCamera = async () => {
+    setCameraError(null);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "user", width: 320, height: 240 }
+      });
+      setCameraStream(stream);
+      setCameraActive(true);
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+    } catch (err: any) {
+      setCameraError("Gagal akses kamera: " + (err.message || "Izin ditolak"));
+    }
+  };
+
+  // Capture frame from video to canvas
+  const handleCapturePhoto = () => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!video || !canvas) return;
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    ctx.drawImage(video, 0, 0);
+    const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
+    setCapturedPhoto(dataUrl);
+  };
+
+  // Retake photo (keep camera open)
+  const handleRetakePhoto = () => {
+    setCapturedPhoto(null);
+  };
+
+  // Confirm photo + get GPS
+  const handleConfirmPhoto = () => {
+    setCapturedGps(null);
+    setGpsError(null);
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          setCapturedGps(`${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}`);
+        },
+        (err) => {
+          setGpsError("Gagal dapat lokasi: " + err.message);
+          setCapturedGps("-6.2088, 106.8456");
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    } else {
+      setCapturedGps("-6.2088, 106.8456");
+    }
+  };
+
+  // Stop camera
+  const handleCloseCamera = () => {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(t => t.stop());
+    }
+    setCameraStream(null);
+    setCameraActive(false);
+    setCapturedPhoto(null);
+    setCameraError(null);
   };
 
   // Submit clock in
@@ -86,7 +157,7 @@ export default function AbsensiKaryawan({
       return;
     }
 
-    if (!simulatedSelfieUrl) {
+    if (!capturedPhoto) {
       alert("Silakan ambil foto selfie terlebih dahulu untuk validasi kehadiran!");
       return;
     }
@@ -110,13 +181,13 @@ export default function AbsensiKaryawan({
       jam_masuk: jamMasukStr,
       status: finalStatus,
       keterangan: attendanceNote.trim() || (finalStatus === "Telat" ? "Terlambat clock-in masuk shift" : "Hadir tepat waktu"),
-      foto: simulatedSelfieUrl,
-      gps: simulatedGps || undefined
+      foto: capturedPhoto,
+      gps: capturedGps || undefined
     };
 
     onAddAttendance(newAttendance);
-    setSimulatedSelfieUrl(null);
-    setSimulatedGps(null);
+    handleCloseCamera();
+    setCapturedGps(null);
     setAttendanceNote("");
     alert(`Absen Masuk Berhasil! Jam: ${jamMasukStr}. Status: ${finalStatus}`);
   };
@@ -270,34 +341,90 @@ export default function AbsensiKaryawan({
           {!myTodayRecord && (
             <div className="space-y-3 p-4 bg-slate-50 rounded-xl border border-dashed border-slate-200" id="absensi-verification">
               <span className="text-[10px] font-bold text-slate-400 uppercase block tracking-wider">Metode Validasi Kamera & GPS</span>
-              
-              <div className="flex gap-3">
-                {/* Take selfie button */}
+
+              {/* Hidden canvas for capturing */}
+              <canvas ref={canvasRef} className="hidden" />
+
+              {/* Camera preview */}
+              {cameraActive && !capturedPhoto && (
+                <div className="space-y-2">
+                  <div className="relative bg-black rounded-xl overflow-hidden">
+                    <video
+                      ref={videoRef}
+                      autoPlay
+                      playsInline
+                      muted
+                      className="w-full h-48 object-cover"
+                    />
+                    <button
+                      onClick={handleCloseCamera}
+                      className="absolute top-2 right-2 p-1 bg-black/50 text-white rounded-full hover:bg-black/70"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                  {cameraError && (
+                    <p className="text-[10px] text-red-500 flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3" /> {cameraError}
+                    </p>
+                  )}
+                  <button
+                    onClick={handleCapturePhoto}
+                    className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2"
+                  >
+                    <Camera className="w-4 h-4" /> Ambil Foto
+                  </button>
+                </div>
+              )}
+
+              {/* Captured photo preview */}
+              {capturedPhoto && (
+                <div className="space-y-2">
+                  <div className="relative bg-slate-100 rounded-xl overflow-hidden">
+                    <img
+                      src={capturedPhoto}
+                      alt="Selfie"
+                      className="w-full h-48 object-cover"
+                    />
+                  </div>
+                  {capturedGps ? (
+                    <p className="text-[10px] text-slate-500 flex items-center gap-1">
+                      <MapPin className="w-3 h-3 text-rose-400" /> GPS: {capturedGps}
+                    </p>
+                  ) : gpsError ? (
+                    <p className="text-[10px] text-amber-500 flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3" /> {gpsError} (gunakan default)
+                    </p>
+                  ) : null}
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleRetakePhoto}
+                      className="flex-1 py-2 bg-white hover:bg-slate-100 border border-slate-200 rounded-xl text-xs font-semibold text-slate-600 flex items-center justify-center gap-1"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5" /> Ulangi
+                    </button>
+                    <button
+                      onClick={handleConfirmPhoto}
+                      className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1"
+                    >
+                      <CheckCircle className="w-3.5 h-3.5" /> Konfirmasi
+                    </button>
+                  </div>
+                  {!capturedGps && !gpsError && (
+                    <p className="text-[10px] text-slate-400 text-center">Klik Konfirmasi untuk ambil lokasi GPS</p>
+                  )}
+                </div>
+              )}
+
+              {/* Open camera button (shown when camera is not active) */}
+              {!cameraActive && !capturedPhoto && (
                 <button 
-                  onClick={handleTakeSelfie}
-                  className="flex-1 py-3 bg-white hover:bg-slate-100 border border-slate-200 rounded-xl text-center text-xs font-semibold text-slate-600 transition-colors flex items-center justify-center gap-1.5 focus:outline-none cursor-pointer"
+                  onClick={handleOpenCamera}
+                  className="w-full py-3 bg-white hover:bg-slate-100 border border-slate-200 rounded-xl text-center text-xs font-semibold text-slate-600 transition-colors flex items-center justify-center gap-1.5 focus:outline-none cursor-pointer"
                 >
                   <Camera className="w-4 h-4 text-indigo-500" />
-                  Ambil Selfie (Mock)
+                  Buka Kamera
                 </button>
-              </div>
-
-              {simulatedSelfieUrl && (
-                <div className="flex items-center gap-3 bg-indigo-50/50 p-2.5 rounded-lg border border-indigo-100/40 animate-fade-in">
-                  <img 
-                    src={simulatedSelfieUrl} 
-                    alt="Selfie" 
-                    className="w-12 h-12 rounded-full object-cover border-2 border-indigo-500 referrerPolicy='no-referrer'" 
-                  />
-                  <div className="text-[10px]">
-                    <p className="font-bold text-indigo-800 flex items-center gap-0.5">
-                      <CheckCircle className="w-3.5 h-3.5 text-emerald-500" /> Wajah Terdeteksi
-                    </p>
-                    <p className="text-slate-500 flex items-center gap-0.5 mt-0.5">
-                      <MapPin className="w-3 h-3 text-rose-400" /> GPS: {simulatedGps}
-                    </p>
-                  </div>
-                </div>
               )}
 
               <div>
