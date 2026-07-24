@@ -128,6 +128,10 @@ async function initDB() {
       ALTER TABLE transactions ADD COLUMN IF NOT EXISTS pelanggan_wa VARCHAR(20) NOT NULL DEFAULT '';
       ALTER TABLE transactions ADD COLUMN IF NOT EXISTS pelanggan_domisili VARCHAR(200) NOT NULL DEFAULT '';
     `);
+    await client.query(`
+      ALTER TABLE attendance ADD COLUMN IF NOT EXISTS foto TEXT;
+      ALTER TABLE attendance ADD COLUMN IF NOT EXISTS gps VARCHAR(50);
+    `);
 
     // Seed data
     const ownerCheck = await client.query('SELECT id FROM users WHERE username = $1', ['owner']);
