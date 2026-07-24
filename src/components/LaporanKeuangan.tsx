@@ -344,6 +344,22 @@ export default function LaporanKeuangan({
         </div>
       </div>
 
+      {/* TEST CHART - outside tabs */}
+      <div className="h-64 w-full bg-white rounded-xl border p-4" id="test-chart">
+        <p className="text-xs font-bold mb-2">TEST CHART (data: {dailyTrendData.length})</p>
+        <div className="h-48 w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={dailyTrendData} margin={{ top: 5, right: 5, left: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+              <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b' }} />
+              <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#94a3b8' }} />
+              <Tooltip />
+              <Area type="monotone" dataKey="omzet" stroke="#4f46e5" strokeWidth={2} fill="#4f46e5" fillOpacity={0.2} />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
       {/* Reports navigation list tabs */}
       <div className="flex items-center space-x-1.5 border-b border-slate-200 overflow-x-auto pb-1">
         <button 
