@@ -40,14 +40,16 @@ export type StatusTransaksi = "lunas" | "retur";
 
 export interface Transaksi {
   id: string;
-  tanggal: string; // ISO String
+  tanggal: string;
   kasir_id: string;
   kasir_nama: string;
   total: number;
-  diskon: number; // nominal discount
+  diskon: number;
   metode_bayar: MetodeBayar;
   status: StatusTransaksi;
   retur_alasan?: string;
+  pelanggan_nama?: string;
+  pelanggan_wa?: string;
   items: DetailTransaksi[];
 }
 

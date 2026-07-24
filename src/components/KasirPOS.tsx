@@ -53,6 +53,10 @@ export default function KasirPOS({
   const [selectedCategory, setSelectedCategory] = useState("Semua");
   const [cart, setCart] = useState<CartItem[]>([]);
   
+  // Customer info
+  const [customerName, setCustomerName] = useState("");
+  const [customerWa, setCustomerWa] = useState("");
+
   // Discount & Approvals
   const [discountInput, setDiscountInput] = useState<number>(0);
   const [appliedDiscount, setAppliedDiscount] = useState<number>(0);
@@ -248,6 +252,8 @@ export default function KasirPOS({
       diskon: appliedDiscount,
       metode_bayar: paymentMethod,
       status: "lunas",
+      pelanggan_nama: customerName.trim() || undefined,
+      pelanggan_wa: customerWa.trim() || undefined,
       items: detailItems
     };
 
@@ -282,6 +288,8 @@ export default function KasirPOS({
     setCart([]);
     setDiscountInput(0);
     setAppliedDiscount(0);
+    setCustomerName("");
+    setCustomerWa("");
     setPaymentMethod("tunai");
     setCashAmountInput("");
     setCheckoutSuccess(false);
@@ -601,6 +609,26 @@ export default function KasirPOS({
             </div>
           </div>
 
+          {/* Customer Info (opsional) */}
+          <div className="px-4 py-2 border-t border-slate-200">
+            <div className="grid grid-cols-2 gap-2">
+              <input
+                type="text"
+                placeholder="Nama Pelanggan (opsional)"
+                value={customerName}
+                onChange={e => setCustomerName(e.target.value)}
+                className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              />
+              <input
+                type="text"
+                placeholder="No. WA Pelanggan (opsional)"
+                value={customerWa}
+                onChange={e => setCustomerWa(e.target.value)}
+                className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              />
+            </div>
+          </div>
+
           {/* Pricing & Checkout Methods Form */}
           <div className="p-4 bg-slate-50 border-t border-slate-200 rounded-b-xl space-y-4">
             
@@ -903,20 +931,32 @@ export default function KasirPOS({
                 {storeProfile?.no_wa && <p className="text-[9px] text-slate-400">WA: {storeProfile.no_wa}</p>}
               </div>
 
-              <div className="border-t border-dashed border-slate-300 pt-2 space-y-1">
-                <div className="flex justify-between">
-                  <span>Kode TX:</span>
-                  <span className="font-bold">{createdTx.id}</span>
+                <div className="border-t border-dashed border-slate-300 pt-2 space-y-1">
+                  <div className="flex justify-between">
+                    <span>Kode TX:</span>
+                    <span className="font-bold">{createdTx.id}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Tanggal:</span>
+                    <span>{new Date(createdTx.tanggal).toLocaleString("id-ID", { dateStyle: "short", timeStyle: "short" })}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Kasir:</span>
+                    <span>{createdTx.kasir_nama}</span>
+                  </div>
+                  {createdTx.pelanggan_nama && (
+                    <div className="flex justify-between">
+                      <span>Pelanggan:</span>
+                      <span>{createdTx.pelanggan_nama}</span>
+                    </div>
+                  )}
+                  {createdTx.pelanggan_wa && (
+                    <div className="flex justify-between">
+                      <span>WA:</span>
+                      <span>{createdTx.pelanggan_wa}</span>
+                    </div>
+                  )}
                 </div>
-                <div className="flex justify-between">
-                  <span>Tanggal:</span>
-                  <span>{new Date(createdTx.tanggal).toLocaleString("id-ID", { dateStyle: "short", timeStyle: "short" })}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Kasir:</span>
-                  <span>{createdTx.kasir_nama}</span>
-                </div>
-              </div>
 
               <div className="border-t border-dashed border-slate-300 pt-2 space-y-1.5">
                 {createdTx.items.map((item, idx) => (

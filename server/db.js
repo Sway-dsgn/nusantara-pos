@@ -55,7 +55,9 @@ async function initDB() {
         diskon DECIMAL(12,2) NOT NULL DEFAULT 0,
         metode_bayar VARCHAR(10) CHECK(metode_bayar IN ('tunai','transfer','qris','kartu')) NOT NULL,
         status VARCHAR(10) CHECK(status IN ('lunas','retur')) NOT NULL DEFAULT 'lunas',
-        retur_alasan TEXT
+        retur_alasan TEXT,
+        pelanggan_nama VARCHAR(100) NOT NULL DEFAULT '',
+        pelanggan_wa VARCHAR(20) NOT NULL DEFAULT ''
       );
 
       CREATE TABLE IF NOT EXISTS detail_transactions (

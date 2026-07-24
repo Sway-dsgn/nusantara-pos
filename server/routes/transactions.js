@@ -46,11 +46,12 @@ router.post('/', verifyToken, async (req, res) => {
     const userResult = await client.query('SELECT id, nama FROM users WHERE id = $1', [req.user.id]);
     const user = userResult.rows[0];
 
-    // Insert transaction
+    const { pelanggan_nama, pelanggan_wa } = req.body;
+
     await client.query(`
-      INSERT INTO transactions (id, tanggal, kasir_id, kasir_nama, total, diskon, metode_bayar, status)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, 'lunas')
-    `, [id, tanggal, user.id, user.nama, total || 0, diskon || 0, metode_bayar]);
+      INSERT INTO transactions (id, tanggal, kasir_id, kasir_nama, total, diskon, metode_bayar, status, pelanggan_nama, pelanggan_wa)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, 'lunas', $8, $9)
+    `, [id, tanggal, user.id, user.nama, total || 0, diskon || 0, metode_bayar, pelanggan_nama || '', pelanggan_wa || '']);
 
     // Insert detail items and deduct stock
     for (const item of items) {
