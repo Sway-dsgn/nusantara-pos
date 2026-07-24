@@ -228,8 +228,8 @@ export default function App() {
       setTransactions(prev => [created, ...prev.filter(t => t.id !== newTx.id)]);
     } catch (err: any) {
       console.error("Gagal simpan transaksi ke server:", err.message || err);
-      setSaveError("Transaksi gagal disimpan ke server! Data hanya tersimpan sementara dan akan hilang saat reload.");
-      setTimeout(() => setSaveError(null), 8000);
+      setSaveError(`Gagal simpan ke server: ${err.message || err}. Data cuma lokal, akan hilang kalo direfresh.`);
+      setTimeout(() => setSaveError(null), 10000);
       // retry after 10s
       setTimeout(() => {
         transactionsApi.create(newTx).then(created => {
