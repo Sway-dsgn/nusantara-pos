@@ -443,12 +443,16 @@ export default function LaporanKeuangan({
                 ) : (
                   <svg width="100%" height="230" xmlns="http://www.w3.org/2000/svg" style={{ border: '1px solid red' }}>
                     <rect x="0" y="0" width="100%" height="230" fill="#f0f0ff" />
-                    <text x="10" y="20" fontSize="12" fill="#4338ca">
-                      Data: {dailyTrendData.length} points
+                    <text x="10" y="20" fontSize="12" fill="#4338ca" fontFamily="monospace">
+                      Data: {dailyTrendData.length} | {dailyTrendData.map(d => `${d.label}=Rp${d.omzet}`).join(', ')}
                     </text>
-                    {dailyTrendData.map((d, i) => (
-                      <circle key={i} cx={30 + i * 60} cy={180 - (d.omzet / Math.max(...dailyTrendData.map(x => x.omzet))) * 150} r="4" fill="#4f46e5" />
-                    ))}
+                    {dailyTrendData.map((d, i) => {
+                      const maxVal = Math.max(...dailyTrendData.map(x => x.omzet));
+                      const cy = maxVal > 0 ? 210 - (d.omzet / maxVal) * 190 : 210;
+                      return (
+                        <circle key={i} cx={30 + i * 60} cy={cy} r="5" fill="#4f46e5" stroke="#fff" strokeWidth="2" />
+                      );
+                    })}
                   </svg>
                 )}
               </div>
