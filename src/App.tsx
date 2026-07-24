@@ -368,6 +368,7 @@ export default function App() {
   };
 
   const handleUpdateStoreProfile = async (profile: StoreProfile) => {
+    setStoreProfile(profile);
     try {
       const saved = await storeProfileApi.update(profile);
       setStoreProfile(saved);
@@ -375,6 +376,14 @@ export default function App() {
       console.error("Failed to update store profile:", err);
     }
   };
+
+  // ─── Refresh users when entering settings ───────────────────────────
+  useEffect(() => {
+    if (activeView === "settings") {
+      usersApi.list().then(setUsers).catch(console.error);
+      storeProfileApi.get().then(setStoreProfile).catch(console.error);
+    }
+  }, [activeView]);
 
   // ─── Loading State ───────────────────────────────────────────────────
   if (loading) {
