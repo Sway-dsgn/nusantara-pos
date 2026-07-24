@@ -214,7 +214,7 @@ export default function DashboardOwner({
               Dari {todayTxCount} transaksi
             </p>
           </div>
-          <div className="p-3 bg-indigo-50 rounded-xl text-indigo-600">
+          <div className="p-3 bg-indigo-50 rounded-xl text-indigo-600 flex items-center justify-center flex-shrink-0">
             <TrendingUp className="w-6 h-6" />
           </div>
         </div>
@@ -230,7 +230,7 @@ export default function DashboardOwner({
             <h3 className="text-2xl font-bold text-slate-800 mt-1">{todayTxCount}</h3>
             <p className="text-xs text-slate-500 mt-1">Hari ini ({todayStr})</p>
           </div>
-          <div className="p-3 bg-indigo-50 rounded-xl text-indigo-600">
+          <div className="p-3 bg-indigo-50 rounded-xl text-indigo-600 flex items-center justify-center flex-shrink-0">
             <ShoppingBag className="w-6 h-6" />
           </div>
         </div>
@@ -258,7 +258,7 @@ export default function DashboardOwner({
               )}
             </p>
           </div>
-          <div className={`p-3 rounded-xl ${lowStockCount > 0 ? 'bg-amber-50 text-amber-600' : 'bg-slate-50 text-slate-400'}`}>
+          <div className={`p-3 rounded-xl flex items-center justify-center flex-shrink-0 ${lowStockCount > 0 ? 'bg-amber-50 text-amber-600' : 'bg-slate-50 text-slate-400'}`}>
             <AlertTriangle className="w-6 h-6" />
           </div>
         </div>
@@ -277,7 +277,7 @@ export default function DashboardOwner({
               Dari absensi hari ini
             </p>
           </div>
-          <div className="p-3 bg-indigo-50 rounded-xl text-indigo-600">
+          <div className="p-3 bg-indigo-50 rounded-xl text-indigo-600 flex items-center justify-center flex-shrink-0">
             <Users className="w-6 h-6" />
           </div>
         </div>

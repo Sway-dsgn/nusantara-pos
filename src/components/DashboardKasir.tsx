@@ -111,7 +111,7 @@ export default function DashboardKasir({
               Sesi aktif Anda hari ini
             </p>
           </div>
-          <div className="p-3 bg-indigo-50 rounded-xl text-indigo-600">
+          <div className="p-3 bg-indigo-50 rounded-xl text-indigo-600 flex items-center justify-center flex-shrink-0">
             <TrendingUp className="w-6 h-6" />
           </div>
         </div>
@@ -123,7 +123,7 @@ export default function DashboardKasir({
             <h3 className="text-2xl font-bold text-slate-800 mt-1">{shiftTxCount}</h3>
             <p className="text-xs text-slate-500 mt-1">Selesai dicetak struk</p>
           </div>
-          <div className="p-3 bg-blue-50 rounded-xl text-blue-600">
+          <div className="p-3 bg-blue-50 rounded-xl text-blue-600 flex items-center justify-center flex-shrink-0">
             <ShoppingBag className="w-6 h-6" />
           </div>
         </div>
@@ -143,7 +143,7 @@ export default function DashboardKasir({
               )}
             </p>
           </div>
-          <div className={`p-3 rounded-xl ${myTodayAttendance ? 'bg-indigo-50 text-indigo-600' : 'bg-rose-50 text-rose-500'}`}>
+          <div className={`p-3 rounded-xl flex items-center justify-center flex-shrink-0 ${myTodayAttendance ? 'bg-indigo-50 text-indigo-600' : 'bg-rose-50 text-rose-500'}`}>
             <Fingerprint className="w-6 h-6" />
           </div>
         </div>
