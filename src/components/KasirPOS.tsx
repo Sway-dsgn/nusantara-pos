@@ -487,6 +487,8 @@ export default function KasirPOS({
                   <tr>
                     <th className="py-2 px-3">Waktu</th>
                     <th className="py-2 px-3">Kode TX</th>
+                    <th className="py-2 px-3">Pelanggan</th>
+                    <th className="py-2 px-3">Kontak</th>
                     {currentUser.role === "owner" && <th className="py-2 px-3">Kasir</th>}
                     <th className="py-2 px-3">Total</th>
                     <th className="py-2 px-3">Metode</th>
@@ -501,6 +503,8 @@ export default function KasirPOS({
                         {new Date(tx.tanggal).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}
                       </td>
                       <td className="py-2 px-3 font-bold text-slate-700">{tx.id}</td>
+                      <td className="py-2 px-3 text-slate-600">{tx.pelanggan_nama || "-"}</td>
+                      <td className="py-2 px-3 text-slate-500 text-[10px]">{(tx.pelanggan_wa || tx.pelanggan_domisili) ? [tx.pelanggan_wa, tx.pelanggan_domisili].filter(Boolean).join(" · ") : "-"}</td>
                       {currentUser.role === "owner" && (
                         <td className="py-2 px-3 text-slate-600">{tx.kasir_nama.split(" ")[0]}</td>
                       )}

@@ -276,11 +276,14 @@ export default function LaporanKeuangan({
   };
 
   const exportSalesCSV = () => {
-    const headers = ["ID Transaksi", "Tanggal", "Nama Kasir", "Total Belanja (IDR)", "Diskon (IDR)", "Metode Bayar", "Status"];
+    const headers = ["ID Transaksi", "Tanggal", "Nama Kasir", "Pelanggan", "No. WA", "Domisili", "Total Belanja (IDR)", "Diskon (IDR)", "Metode Bayar", "Status"];
     const rows = filteredTransactions.map(t => [
       t.id,
       new Date(t.tanggal).toLocaleString("id-ID"),
       t.kasir_nama,
+      t.pelanggan_nama || "",
+      t.pelanggan_wa || "",
+      t.pelanggan_domisili || "",
       t.total,
       t.diskon,
       t.metode_bayar,
@@ -536,6 +539,11 @@ export default function LaporanKeuangan({
                     <div className="text-[10px] text-slate-600">
                       <span className="font-bold">Kasir:</span> {t.kasir_nama}
                     </div>
+                    {t.pelanggan_nama && (
+                      <div className="text-[10px] text-slate-600">
+                        <span className="font-bold">Pelanggan:</span> {t.pelanggan_nama}{t.pelanggan_wa ? ` (${t.pelanggan_wa})` : ""}{t.pelanggan_domisili ? ` - ${t.pelanggan_domisili}` : ""}
+                      </div>
+                    )}
                     <div className="text-[10px] text-slate-500 font-bold max-w-full truncate">
                       {t.items.map(item => `${item.produk_nama} (${item.qty}x)`).join(", ")}
                     </div>
@@ -564,6 +572,7 @@ export default function LaporanKeuangan({
                     <th className="py-2 px-3">Kode TX</th>
                     <th className="py-2 px-3">Tanggal / Waktu</th>
                     <th className="py-2 px-3">Melayani</th>
+                    <th className="py-2 px-3">Pelanggan</th>
                     <th className="py-2 px-3">Barang Terbeli</th>
                     <th className="py-2 px-3">Subtotal Diskon</th>
                     <th className="py-2 px-3">Total Akhir</th>
@@ -579,6 +588,7 @@ export default function LaporanKeuangan({
                         {new Date(t.tanggal).toLocaleString("id-ID")}
                       </td>
                       <td className="py-2.5 px-3 text-slate-600">{t.kasir_nama}</td>
+                      <td className="py-2.5 px-3 text-slate-600 text-[10px]">{t.pelanggan_nama || "-"}{(t.pelanggan_wa || t.pelanggan_domisili) ? ` (${[t.pelanggan_wa, t.pelanggan_domisili].filter(Boolean).join(", ")})` : ""}</td>
                       <td className="py-2.5 px-3 text-[11px] text-slate-500 font-bold max-w-xs truncate">
                         {t.items.map(item => `${item.produk_nama} (${item.qty}x)`).join(", ")}
                       </td>
