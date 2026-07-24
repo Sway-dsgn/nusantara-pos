@@ -80,6 +80,13 @@ export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
 
+  // ─── Refresh products when entering POS or Gudang ───────────────────
+  useEffect(() => {
+    if (activeView === "kasir" || activeView === "gudang") {
+      productsApi.list().then(setProducts).catch(console.error);
+    }
+  }, [activeView]);
+
   // ─── Close sidebar on view change (mobile) ──────────────────────────
   const handleNavigate = (view: string) => {
     setActiveView(view);
