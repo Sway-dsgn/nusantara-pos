@@ -40,23 +40,32 @@ export default function KelolaAkun({
   onUpdateUser
 }: KelolaAkunProps) {
   // Store Settings states
-  const [storeAddress, setStoreAddress] = useState(storeProfile.alamat);
-  const [storePhone, setStorePhone] = useState(storeProfile.no_hp);
-  const [storeWa, setStoreWa] = useState(storeProfile.no_wa || "");
-  const [storeFooter, setStoreFooter] = useState(storeProfile.footer);
-  const [pajakAktif, setPajakAktif] = useState(storeProfile.pajak_aktif);
-  const [pajakPersen, setPajakPersen] = useState(storeProfile.pajak_persen);
-  const [noRekening, setNoRekening] = useState(storeProfile.no_rekening || "");
+  const [storeAddress, setStoreAddress] = useState(() => localStorage.getItem("kp_storeAddress") || storeProfile.alamat);
+  const [storePhone, setStorePhone] = useState(() => localStorage.getItem("kp_storePhone") || storeProfile.no_hp);
+  const [storeWa, setStoreWa] = useState(() => localStorage.getItem("kp_storeWa") || storeProfile.no_wa || "");
+  const [storeFooter, setStoreFooter] = useState(() => localStorage.getItem("kp_storeFooter") || storeProfile.footer);
+  const [pajakAktif, setPajakAktif] = useState(() => localStorage.getItem("kp_pajakAktif") === "true" || storeProfile.pajak_aktif);
+  const [pajakPersen, setPajakPersen] = useState(() => Number(localStorage.getItem("kp_pajakPersen")) || storeProfile.pajak_persen);
+  const [noRekening, setNoRekening] = useState(() => localStorage.getItem("kp_noRekening") || storeProfile.no_rekening || "");
 
   useEffect(() => {
     setStoreAddress(storeProfile.alamat);
     setStorePhone(storeProfile.no_hp);
     setStoreWa(storeProfile.no_wa || "");
     setStoreFooter(storeProfile.footer);
-    setPajakAktif(storeProfile.pajak_aktif);
-    setPajakPersen(storeProfile.pajak_persen);
-    setNoRekening(storeProfile.no_rekening || "");
+    if (!localStorage.getItem("kp_pajakAktif")) setPajakAktif(storeProfile.pajak_aktif);
+    if (!localStorage.getItem("kp_pajakPersen")) setPajakPersen(storeProfile.pajak_persen);
+    if (!localStorage.getItem("kp_noRekening")) setNoRekening(storeProfile.no_rekening || "");
   }, [storeProfile]);
+
+  // Persist to localStorage on change
+  useEffect(() => { localStorage.setItem("kp_pajakAktif", String(pajakAktif)); }, [pajakAktif]);
+  useEffect(() => { localStorage.setItem("kp_pajakPersen", String(pajakPersen)); }, [pajakPersen]);
+  useEffect(() => { localStorage.setItem("kp_noRekening", noRekening); }, [noRekening]);
+  useEffect(() => { localStorage.setItem("kp_storeAddress", storeAddress); }, [storeAddress]);
+  useEffect(() => { localStorage.setItem("kp_storePhone", storePhone); }, [storePhone]);
+  useEffect(() => { localStorage.setItem("kp_storeWa", storeWa); }, [storeWa]);
+  useEffect(() => { localStorage.setItem("kp_storeFooter", storeFooter); }, [storeFooter]);
 
   // User form states
   const [showUserModal, setShowUserModal] = useState(false);

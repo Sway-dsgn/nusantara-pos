@@ -47,6 +47,14 @@ export default function KasirPOS({
   onUpdateProducts,
   onLogStockMovement
 }: KasirPOSProps) {
+  // LocalStorage fallback for pajak & rekening settings
+  const lsPajakAktif = localStorage.getItem("kp_pajakAktif") === "true";
+  const lsPajakPersen = Number(localStorage.getItem("kp_pajakPersen")) || 0;
+  const lsNoRekening = localStorage.getItem("kp_noRekening") || "";
+  const pajakAktif = storeProfile?.pajak_aktif ?? lsPajakAktif;
+  const pajakPersen = storeProfile?.pajak_persen ?? lsPajakPersen;
+  const noRekeningToko = storeProfile?.no_rekening || lsNoRekening;
+
   // POS States
   const todayStr = new Date().toISOString().split("T")[0];
   const [searchQuery, setSearchQuery] = useState("");
@@ -957,7 +965,7 @@ export default function KasirPOS({
                 <p className="text-[10px] text-slate-500">{storeProfile?.alamat || "Jl. Pembangunan No. 42, Kota Jakarta"}</p>
                 <p className="text-[9px] text-slate-400">Telp: {storeProfile?.no_hp || "0812-3456-7890"}</p>
                 {storeProfile?.no_wa && <p className="text-[9px] text-slate-400">WA: {storeProfile.no_wa}</p>}
-                {storeProfile?.no_rekening && <p className="text-[9px] text-slate-400">Rek: {storeProfile.no_rekening}</p>}
+                {noRekeningToko && <p className="text-[9px] text-slate-400">Rek: {noRekeningToko}</p>}
               </div>
 
                 <div className="border-t border-dashed border-slate-300 pt-2 space-y-1">
@@ -1024,15 +1032,15 @@ export default function KasirPOS({
                     <span>- {formatRupiah(createdTx.diskon)}</span>
                   </div>
                 )}
-                {storeProfile?.pajak_aktif && storeProfile.pajak_persen > 0 && (
+                {pajakAktif && pajakPersen > 0 && (
                   <div className="flex justify-between text-amber-700">
-                    <span>PPN {storeProfile.pajak_persen}%:</span>
-                    <span>+ {formatRupiah(Math.round((createdTx.total) * storeProfile.pajak_persen / 100))}</span>
+                    <span>PPN {pajakPersen}%:</span>
+                    <span>+ {formatRupiah(Math.round((createdTx.total) * pajakPersen / 100))}</span>
                   </div>
                 )}
                 <div className="flex justify-between text-sm border-t border-solid border-slate-300 pt-1 text-slate-900">
                   <span>TOTAL:</span>
-                  <span>{formatRupiah(storeProfile?.pajak_aktif && storeProfile.pajak_persen > 0 ? createdTx.total + Math.round(createdTx.total * storeProfile.pajak_persen / 100) : createdTx.total)}</span>
+                  <span>{formatRupiah(pajakAktif && pajakPersen > 0 ? createdTx.total + Math.round(createdTx.total * pajakPersen / 100) : createdTx.total)}</span>
                 </div>
                 <div className="flex justify-between text-[9px] font-normal text-slate-500">
                   <span>Metode Bayar:</span>
@@ -1040,9 +1048,9 @@ export default function KasirPOS({
                 </div>
               </div>
 
-              {storeProfile?.no_rekening && (
+              {noRekeningToko && (
                 <div className="border-t border-dashed border-slate-300 pt-2 text-[9px] text-slate-500 text-center">
-                  <span className="font-semibold">No. Rekening:</span> {storeProfile.no_rekening}
+                  <span className="font-semibold">No. Rekening:</span> {noRekeningToko}
                 </div>
               )}
 
