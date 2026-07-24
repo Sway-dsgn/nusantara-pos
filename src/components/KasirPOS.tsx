@@ -1092,7 +1092,7 @@ export default function KasirPOS({
                 onClick={async () => {
                   const receiptEl = document.getElementById("receipt-print-area");
                   if (!receiptEl) return;
-                  const wa = (customerWa || storeProfile?.kontak || "").replace(/[^0-9]/g, "");
+                  const wa = (customerWa || storeProfile?.no_wa || "").replace(/[^0-9]/g, "");
                   try {
                     const canvas = await html2canvas(receiptEl, { scale: 2, backgroundColor: "#ffffff", useCORS: true, allowTaint: false });
                     const imgData = canvas.toDataURL("image/png");

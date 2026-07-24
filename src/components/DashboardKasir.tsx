@@ -14,7 +14,8 @@ import {
   ArrowRight,
   Zap,
   FileText,
-  BarChart2
+  BarChart2,
+  Fingerprint
 } from "lucide-react";
 import { 
   ResponsiveContainer, 

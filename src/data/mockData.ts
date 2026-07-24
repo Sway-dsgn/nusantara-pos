@@ -9,7 +9,9 @@ export const DEFAULT_STORE_PROFILE: StoreProfile = {
   nama: "NUSANTARA POS",
   alamat: "Jl. Pembangunan No. 42, Kota Jakarta",
   no_hp: "0812-3456-7890",
-  footer: "Terima kasih atas kunjungan Anda!"
+  footer: "Terima kasih atas kunjungan Anda!",
+  pajak_aktif: false,
+  pajak_persen: 0
 };
 
 // Only 1 Owner Account as requested ("dibuat dari 0 dan buat akun 1 owner aja yang bakal bisa buat akun untuk karyawan")
