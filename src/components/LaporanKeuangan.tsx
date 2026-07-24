@@ -541,13 +541,24 @@ export default function LaporanKeuangan({
                     </div>
                     {t.pelanggan_nama && (
                       <div className="text-[10px] text-slate-600">
-                        <span className="font-bold">Pelanggan:</span> {t.pelanggan_nama}{t.pelanggan_wa ? ` (${t.pelanggan_wa})` : ""}{t.pelanggan_domisili ? ` - ${t.pelanggan_domisili}` : ""}
+                        <span className="font-bold">Pelanggan:</span> {t.pelanggan_nama}
+                      </div>
+                    )}
+                    {t.pelanggan_wa && (
+                      <div className="text-[10px] text-slate-500">
+                        <span className="font-bold">WA:</span> {t.pelanggan_wa}
+                      </div>
+                    )}
+                    {t.pelanggan_domisili && (
+                      <div className="text-[10px] text-slate-500">
+                        <span className="font-bold">Domisili:</span> {t.pelanggan_domisili}
                       </div>
                     )}
                     <div className="text-[10px] text-slate-500 font-bold max-w-full truncate">
                       {t.items.map(item => `${item.produk_nama} (${item.qty}x)`).join(", ")}
                     </div>
                     <div className="flex items-center justify-between pt-1 border-t border-slate-100">
+                      <div className="text-[10px] text-slate-500">Jml: {t.items.reduce((sum, i) => sum + i.qty, 0)} item</div>
                       <span className="text-[10px] text-slate-400 uppercase font-semibold">{t.metode_bayar}</span>
                       <div className="text-right">
                         <span className="text-xs font-bold text-slate-900 font-mono">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(t.total)}</span>
@@ -573,8 +584,11 @@ export default function LaporanKeuangan({
                     <th className="py-2 px-3">Tanggal / Waktu</th>
                     <th className="py-2 px-3">Melayani</th>
                     <th className="py-2 px-3">Pelanggan</th>
+                    <th className="py-2 px-3">No. WA</th>
+                    <th className="py-2 px-3">Domisili</th>
                     <th className="py-2 px-3">Barang Terbeli</th>
                     <th className="py-2 px-3">Subtotal Diskon</th>
+                    <th className="py-2 px-3">Jml</th>
                     <th className="py-2 px-3">Total Akhir</th>
                     <th className="py-2 px-3">Pembayaran</th>
                     <th className="py-2 px-3">Status</th>
@@ -588,11 +602,14 @@ export default function LaporanKeuangan({
                         {new Date(t.tanggal).toLocaleString("id-ID")}
                       </td>
                       <td className="py-2.5 px-3 text-slate-600">{t.kasir_nama}</td>
-                      <td className="py-2.5 px-3 text-slate-600 text-[10px]">{t.pelanggan_nama || "-"}{(t.pelanggan_wa || t.pelanggan_domisili) ? ` (${[t.pelanggan_wa, t.pelanggan_domisili].filter(Boolean).join(", ")})` : ""}</td>
+                      <td className="py-2.5 px-3 text-slate-600 text-[10px]">{t.pelanggan_nama || "-"}</td>
+                      <td className="py-2.5 px-3 text-slate-500 text-[10px]">{t.pelanggan_wa || "-"}</td>
+                      <td className="py-2.5 px-3 text-slate-500 text-[10px]">{t.pelanggan_domisili || "-"}</td>
                       <td className="py-2.5 px-3 text-[11px] text-slate-500 font-bold max-w-xs truncate">
                         {t.items.map(item => `${item.produk_nama} (${item.qty}x)`).join(", ")}
                       </td>
                       <td className="py-2.5 px-3 font-mono text-rose-500">- {formatRupiah(t.diskon)}</td>
+                      <td className="py-2.5 px-3 font-semibold text-slate-700">{t.items.reduce((sum, i) => sum + i.qty, 0)}</td>
                       <td className="py-2.5 px-3 font-bold text-slate-900 font-mono">{formatRupiah(t.total)}</td>
                       <td className="py-2.5 px-3 uppercase font-semibold text-[10px] text-slate-600">{t.metode_bayar}</td>
                       <td className="py-2.5 px-3">

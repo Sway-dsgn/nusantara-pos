@@ -488,8 +488,10 @@ export default function KasirPOS({
                     <th className="py-2 px-3">Waktu</th>
                     <th className="py-2 px-3">Kode TX</th>
                     <th className="py-2 px-3">Pelanggan</th>
-                    <th className="py-2 px-3">Kontak</th>
+                    <th className="py-2 px-3">No. WA</th>
+                    <th className="py-2 px-3">Domisili</th>
                     {currentUser.role === "owner" && <th className="py-2 px-3">Kasir</th>}
+                    <th className="py-2 px-3">Jml</th>
                     <th className="py-2 px-3">Total</th>
                     <th className="py-2 px-3">Metode</th>
                     <th className="py-2 px-3">Status</th>
@@ -504,10 +506,12 @@ export default function KasirPOS({
                       </td>
                       <td className="py-2 px-3 font-bold text-slate-700">{tx.id}</td>
                       <td className="py-2 px-3 text-slate-600">{tx.pelanggan_nama || "-"}</td>
-                      <td className="py-2 px-3 text-slate-500 text-[10px]">{(tx.pelanggan_wa || tx.pelanggan_domisili) ? [tx.pelanggan_wa, tx.pelanggan_domisili].filter(Boolean).join(" · ") : "-"}</td>
+                      <td className="py-2 px-3 text-slate-500 text-[10px]">{tx.pelanggan_wa || "-"}</td>
+                      <td className="py-2 px-3 text-slate-500 text-[10px]">{tx.pelanggan_domisili || "-"}</td>
                       {currentUser.role === "owner" && (
                         <td className="py-2 px-3 text-slate-600">{tx.kasir_nama.split(" ")[0]}</td>
                       )}
+                      <td className="py-2 px-3 font-semibold text-slate-700">{tx.items.reduce((sum, i) => sum + i.qty, 0)}</td>
                       <td className="py-2 px-3 font-semibold text-slate-800">{formatRupiah(tx.total)}</td>
                       <td className="py-2 px-3 uppercase text-[10px] font-bold text-slate-600">{tx.metode_bayar}</td>
                       <td className="py-2 px-3">
