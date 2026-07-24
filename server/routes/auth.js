@@ -15,7 +15,7 @@ router.post('/login', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
     if (result.rows.length === 0) {
-      return res.status(401).json({ error: 'Username atau Kata Sandi salah!' });
+      return res.status(400).json({ error: 'Username atau Kata Sandi salah!' });
     }
 
     const user = result.rows[0];
@@ -25,7 +25,7 @@ router.post('/login', async (req, res) => {
 
     const valid = bcrypt.compareSync(password, user.password);
     if (!valid) {
-      return res.status(401).json({ error: 'Username atau Kata Sandi salah!' });
+      return res.status(400).json({ error: 'Username atau Kata Sandi salah!' });
     }
 
     const token = generateToken(user);
