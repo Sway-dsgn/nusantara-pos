@@ -31,6 +31,7 @@ async function initDB() {
         username VARCHAR(50) UNIQUE NOT NULL,
         password VARCHAR(100) NOT NULL,
         no_hp VARCHAR(20) NOT NULL,
+        domisili VARCHAR(200) NOT NULL DEFAULT '',
         aktif BOOLEAN NOT NULL DEFAULT true
       );
 
@@ -116,9 +117,9 @@ async function initDB() {
     if (ownerCheck.rows.length === 0) {
       const hashedPassword = bcrypt.hashSync('123', 10);
       await client.query(`
-        INSERT INTO users (id, nama, role, username, password, no_hp, aktif)
-        VALUES ($1, $2, $3, $4, $5, $6, $7)
-      `, ['usr-1', 'Hendra Wijaya', 'owner', 'owner', hashedPassword, '081234567890', true]);
+        INSERT INTO users (id, nama, role, username, password, no_hp, domisili, aktif)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      `, ['usr-1', 'Hendra Wijaya', 'owner', 'owner', hashedPassword, '081234567890', 'Jakarta', true]);
       console.log('✓ Seed: owner account created');
     }
 

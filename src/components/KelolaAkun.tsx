@@ -58,6 +58,7 @@ export default function KelolaAkun({
   const [formUsername, setFormUsername] = useState("");
   const [formPassword, setFormPassword] = useState("");
   const [formNoHp, setFormNoHp] = useState("");
+  const [formDomisili, setFormDomisili] = useState("");
   const [formRole, setFormRole] = useState<"owner" | "kasir">("kasir");
 
   const openAddUserModal = () => {
@@ -67,6 +68,7 @@ export default function KelolaAkun({
     setFormUsername("");
     setFormPassword("");
     setFormNoHp("");
+    setFormDomisili("");
     setFormRole("kasir");
     setShowUserModal(true);
   };
@@ -78,6 +80,7 @@ export default function KelolaAkun({
     setFormUsername(u.username);
     setFormPassword(u.password || "");
     setFormNoHp(u.no_hp);
+    setFormDomisili(u.domisili || "");
     setFormRole(u.role);
     setShowUserModal(true);
   };
@@ -104,6 +107,7 @@ export default function KelolaAkun({
         username: formUsername,
         password: formPassword,
         no_hp: formNoHp,
+        domisili: formDomisili,
         aktif: true
       };
       onAddUser(newUser);
@@ -119,6 +123,7 @@ export default function KelolaAkun({
         username: formUsername,
         password: formPassword,
         no_hp: formNoHp,
+        domisili: formDomisili,
         role: formRole
       };
       onUpdateUser(updatedUser);
@@ -138,6 +143,7 @@ export default function KelolaAkun({
       ...u,
       aktif: !u.aktif
     };
+    updatedUser.domisili = u.domisili;
     onUpdateUser(updatedUser);
     alert(`Status akun ${u.nama} berhasil dirubah menjadi ${!u.aktif ? 'AKTIF' : 'NON-AKTIF'}.`);
   };
@@ -182,10 +188,10 @@ export default function KelolaAkun({
               <thead className="text-[10px] text-slate-400 uppercase bg-slate-50/50">
                 <tr>
                   <th className="py-2.5 px-3">Nama Lengkap</th>
+                  <th className="py-2.5 px-3">Domisili</th>
                   <th className="py-2.5 px-3">Username</th>
-                  <th className="py-2.5 px-3">Kata Sandi</th>
                   <th className="py-2.5 px-3">No. HP WA</th>
-                  <th className="py-2.5 px-3">Hak Akses (Role)</th>
+                  <th className="py-2.5 px-3">Hak Akses</th>
                   <th className="py-2.5 px-3">Status</th>
                   <th className="py-2.5 px-3 text-right">Aksi</th>
                 </tr>
@@ -194,8 +200,8 @@ export default function KelolaAkun({
                 {users.map(u => (
                   <tr key={u.id} className="hover:bg-slate-50/20">
                     <td className="py-3 px-3 font-bold text-slate-800">{u.nama}</td>
+                    <td className="py-3 px-3 text-slate-600">{u.domisili || '-'}</td>
                     <td className="py-3 px-3 font-mono">{u.username}</td>
-                    <td className="py-3 px-3 font-mono text-slate-400">•••••••</td>
                     <td className="py-3 px-3">{u.no_hp}</td>
                     <td className="py-3 px-3">
                       <select
@@ -384,6 +390,19 @@ export default function KelolaAkun({
                   onChange={e => setFormNoHp(e.target.value)}
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:bg-white"
                   required
+                />
+              </div>
+
+              <div>
+                <label className="block mb-1 text-slate-500 font-medium flex items-center gap-1">
+                  <MapPin className="w-3.5 h-3.5 text-slate-400" /> Domisili (opsional)
+                </label>
+                <input 
+                  type="text" 
+                  placeholder="Contoh: Jakarta Selatan"
+                  value={formDomisili}
+                  onChange={e => setFormDomisili(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:bg-white"
                 />
               </div>
 

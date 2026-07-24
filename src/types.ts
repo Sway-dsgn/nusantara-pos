@@ -10,8 +10,9 @@ export interface User {
   nama: string;
   role: Role;
   username: string;
-  password?: string; // stored plainly for mockup/local demo purposes
+  password?: string;
   no_hp: string;
+  domisili?: string;
   aktif: boolean;
 }
 

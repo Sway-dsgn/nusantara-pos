@@ -11,9 +11,9 @@ router.get('/', verifyToken, async (req, res) => {
   try {
     let result;
     if (req.user.role === 'owner') {
-      result = await pool.query('SELECT id, nama, role, username, no_hp, aktif FROM users');
+      result = await pool.query('SELECT id, nama, role, username, no_hp, domisili, aktif FROM users');
     } else {
-      result = await pool.query('SELECT id, nama, role, username, no_hp, aktif FROM users WHERE id = $1', [req.user.id]);
+      result = await pool.query('SELECT id, nama, role, username, no_hp, domisili, aktif FROM users WHERE id = $1', [req.user.id]);
     }
     res.json(result.rows);
   } catch (err) {
@@ -23,7 +23,7 @@ router.get('/', verifyToken, async (req, res) => {
 
 // POST /api/users
 router.post('/', verifyToken, requireOwner, async (req, res) => {
-  const { nama, role, username, password, no_hp } = req.body;
+  const { nama, role, username, password, no_hp, domisili } = req.body;
   if (!nama || !username || !password || !no_hp) {
     return res.status(400).json({ error: 'Semua kolom harus diisi' });
   }
@@ -38,11 +38,11 @@ router.post('/', verifyToken, requireOwner, async (req, res) => {
     const hashedPassword = bcrypt.hashSync(password, 10);
 
     await pool.query(`
-      INSERT INTO users (id, nama, role, username, password, no_hp, aktif)
-      VALUES ($1, $2, $3, $4, $5, $6, true)
-    `, [id, nama, role || 'kasir', username, hashedPassword, no_hp]);
+      INSERT INTO users (id, nama, role, username, password, no_hp, domisili, aktif)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, true)
+    `, [id, nama, role || 'kasir', username, hashedPassword, no_hp, domisili || '']);
 
-    const result = await pool.query('SELECT id, nama, role, username, no_hp, aktif FROM users WHERE id = $1', [id]);
+    const result = await pool.query('SELECT id, nama, role, username, no_hp, domisili, aktif FROM users WHERE id = $1', [id]);
     res.status(201).json(result.rows[0]);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -52,7 +52,7 @@ router.post('/', verifyToken, requireOwner, async (req, res) => {
 // PUT /api/users/:id
 router.put('/:id', verifyToken, requireOwner, async (req, res) => {
   const { id } = req.params;
-  const { nama, role, username, password, no_hp, aktif } = req.body;
+  const { nama, role, username, password, no_hp, domisili, aktif } = req.body;
 
   try {
     const existing = await pool.query('SELECT * FROM users WHERE id = $1', [id]);
@@ -70,19 +70,20 @@ router.put('/:id', verifyToken, requireOwner, async (req, res) => {
     const hashedPassword = password ? bcrypt.hashSync(password, 10) : old.password;
 
     await pool.query(`
-      UPDATE users SET nama = $1, role = $2, username = $3, password = $4, no_hp = $5, aktif = $6
-      WHERE id = $7
+      UPDATE users SET nama = $1, role = $2, username = $3, password = $4, no_hp = $5, domisili = $6, aktif = $7
+      WHERE id = $8
     `, [
       nama || old.nama,
       role || old.role,
       username || old.username,
       hashedPassword,
       no_hp || old.no_hp,
+      domisili !== undefined ? domisili : old.domisili,
       aktif !== undefined ? aktif : old.aktif,
       id
     ]);
 
-    const result = await pool.query('SELECT id, nama, role, username, no_hp, aktif FROM users WHERE id = $1', [id]);
+    const result = await pool.query('SELECT id, nama, role, username, no_hp, domisili, aktif FROM users WHERE id = $1', [id]);
     res.json(result.rows[0]);
   } catch (err) {
     res.status(500).json({ error: err.message });
