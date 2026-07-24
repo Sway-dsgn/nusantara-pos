@@ -32,7 +32,6 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 
   if (res.status === 401) {
     removeToken();
-    window.location.reload();
     throw new Error('Sesi telah berakhir, silakan login kembali');
   }
 
